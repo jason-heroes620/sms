@@ -1,0 +1,112 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head } from '@inertiajs/react';
+import { useState } from 'react';
+import Bukku from './Bukku';
+import Configurations from './Configurations';
+import Jibble from './Jibble';
+import Payroll from './Payroll';
+
+type IntegrationKeys = {
+    payroll: {
+        integration: string;
+        client_id: string;
+        client_secret: string;
+    };
+    jibble: {
+        integration: string;
+        client_id: string;
+        client_secret: string;
+    };
+    bukku: {
+        integration: string;
+        token: string;
+        subdomain: string;
+    };
+    accounts: Account[];
+    tax_codes: Tax[];
+    terms: Term[];
+    account_receivables: Account[];
+};
+
+type Account = {
+    id: string;
+    code: number;
+    name: string;
+    type: string;
+};
+
+type Tax = {
+    id: string;
+    code: string;
+    rate: number;
+    tax_system: string;
+    is_archived: boolean;
+    is_exempted: boolean;
+};
+
+type Term = {
+    id: string;
+    name: string;
+};
+
+const Integrations = ({
+    payroll,
+    jibble,
+    bukku,
+    accounts,
+    tax_codes,
+    terms,
+    account_receivables,
+}: IntegrationKeys) => {
+    const [activeTab, setActiveTab] = useState('account');
+    return (
+        <AuthenticatedLayout>
+            <Head title="Integrations" />
+            <div className="mx-auto">
+                <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
+                    <div className="flex items-center justify-between p-4 text-gray-900 dark:text-gray-100">
+                        <div>
+                            <span className="font-bold">Integration </span>
+                        </div>
+                    </div>
+                </div>
+                <div className="py-8">
+                    <div className="w-full">
+                        <Tabs
+                            defaultValue={activeTab}
+                            onValueChange={setActiveTab}
+                            className="w-full"
+                        >
+                            <TabsList>
+                                <TabsTrigger value="account">
+                                    Integration Accounts
+                                </TabsTrigger>
+                                <TabsTrigger value="configurations">
+                                    Configurations
+                                </TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="account">
+                                <div className="flex flex-col gap-4 rounded-md border px-4 py-4">
+                                    <Payroll payroll={payroll} />
+                                    <Jibble jibble={jibble} />
+                                    <Bukku bukku={bukku} />
+                                </div>
+                            </TabsContent>
+                            <TabsContent value="configurations">
+                                <Configurations
+                                    accounts={accounts}
+                                    tax_codes={tax_codes}
+                                    terms={terms}
+                                    account_receivables={account_receivables}
+                                />
+                            </TabsContent>
+                        </Tabs>
+                    </div>
+                </div>
+            </div>
+        </AuthenticatedLayout>
+    );
+};
+
+export default Integrations;

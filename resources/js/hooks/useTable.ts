@@ -58,8 +58,13 @@ export function useTable<T>(
             const response = await axios.get<ApiResponse<T>>(endpoint, {
                 params,
             });
+            // console.log('datatable ', response.data);
             setData(response.data.data);
             setMeta(response.data.meta);
+
+            if (response.data.filters) {
+                setFilters(response.data.filters);
+            }
             setError(null);
         } catch (err) {
             setError('Failed to fetch data');

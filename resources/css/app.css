@@ -4,6 +4,7 @@
 
 @custom-variant dark (&:is(.dark *));
 @import 'tailwindcss';
+
 @source "../views";
 
 @theme {
@@ -211,4 +212,12 @@ input[type='file']::file-selector-button:active {
 input[type='file' i] {
     /* the name of the selected file */
     width: 100%;
+}
+
+.fc-event-time {
+    font-weight: 800;
+}
+.fc-event-title {
+    font-size: 14px;
+    font-weight: 800;
 }

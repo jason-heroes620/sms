@@ -25,42 +25,41 @@ import {
     Calendar,
     ChevronRight,
     LayoutDashboard,
+    MonitorCog,
     Newspaper,
     NotebookPen,
     NotepadText,
     PencilRuler,
+    Receipt,
     School,
     User,
     Users,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+type SubItem = {
+    key: string;
+    label: string;
+    href: string;
+};
+
+type GroupItem = {
+    key: string;
+    label: string;
+    icon?: React.ComponentType<{ className?: string }>;
+    href: string;
+    subItems: SubItem[];
+};
+
+type ItemGroup = {
+    group: string;
+    groupItems: GroupItem[];
+};
 
 const items = [
     {
         group: 'General',
         groupItems: [
-            {
-                key: 'students',
-                label: 'Students',
-                icon: User,
-                href: '/students',
-                subItems: [
-                    {
-                        key: 'all-students',
-                        label: 'All Students',
-                        href: '/students',
-                    },
-                    {
-                        key: 'add-student',
-                        label: 'Add Student',
-                        href: '/student/create',
-                    },
-                    {
-                        key: 'attendance',
-                        label: 'Attendance',
-                        href: '/attendance',
-                    },
-                ],
-            },
             {
                 key: 'classes',
                 label: 'Classes',
@@ -73,9 +72,65 @@ const items = [
                         href: '/classes',
                     },
                     {
-                        key: 'add-class',
-                        label: 'Add Class',
-                        href: '/class/create',
+                        key: 'new-class',
+                        label: 'New Class',
+                        href: '/classes/create',
+                    },
+                    {
+                        key: 'classes-view',
+                        label: '',
+                        href: '/classes/:id',
+                    },
+                ],
+            },
+            {
+                key: 'sections',
+                label: 'Sections',
+                icon: PencilRuler,
+                href: '/sections',
+                subItems: [
+                    {
+                        key: 'all-sections',
+                        label: 'All Sections',
+                        href: '/sections',
+                    },
+                    {
+                        key: 'new-section',
+                        label: 'New Section',
+                        href: '/sections/create',
+                    },
+                ],
+            },
+            {
+                key: 'students',
+                label: 'Students',
+                icon: User,
+                href: '/students',
+                subItems: [
+                    {
+                        key: 'all-students',
+                        label: 'All Students',
+                        href: '/students',
+                    },
+                    {
+                        key: 'new-admission',
+                        label: 'New Admission',
+                        href: '/student/create',
+                    },
+                    {
+                        key: 'attendance',
+                        label: 'Attendance',
+                        href: '/student/attendance',
+                    },
+                    {
+                        key: 'student-promotion',
+                        label: 'Student Promotion',
+                        href: '/student-promotion',
+                    },
+                    {
+                        key: 'student-view',
+                        label: '',
+                        href: '/students/:id',
                     },
                 ],
             },
@@ -91,9 +146,19 @@ const items = [
                         href: '/subjects',
                     },
                     {
-                        key: 'add-subject',
-                        label: 'Add Subject',
-                        href: '/subject/create',
+                        key: 'new-subject',
+                        label: 'New Subject',
+                        href: '/subjects/create',
+                    },
+                    // {
+                    //     key: 'subject-classes',
+                    //     label: 'Assign Subject',
+                    //     href: '/subject-classes',
+                    // },
+                    {
+                        key: 'subject-view',
+                        label: '',
+                        href: '/subjects/:id',
                     },
                 ],
             },
@@ -104,13 +169,13 @@ const items = [
                 href: '/timetable',
                 subItems: [
                     {
-                        key: 'all-timetables',
-                        label: 'All Timetables',
-                        href: '/timetables',
+                        key: 'timetable',
+                        label: 'Timetable',
+                        href: '/timetable',
                     },
                     {
-                        key: 'add-timetable',
-                        label: 'Add Timetable',
+                        key: 'new-class-schedule',
+                        label: 'New Class Schedule',
                         href: '/timetable/create',
                     },
                 ],
@@ -119,17 +184,27 @@ const items = [
                 key: 'homework',
                 label: 'Homework',
                 icon: NotebookPen,
-                href: '/homework',
+                href: '/homeworks',
                 subItems: [
                     {
                         key: 'all-homework',
                         label: 'All Homework',
-                        href: '/homework',
+                        href: '/homeworks',
                     },
                     {
                         key: 'add-homework',
                         label: 'Add Homework',
                         href: '/homework/create',
+                    },
+                    {
+                        key: 'submissions',
+                        label: 'Submissions',
+                        href: '/homework-submissions',
+                    },
+                    {
+                        key: 'homework-view',
+                        label: '',
+                        href: '/homeworks/:id',
                     },
                 ],
             },
@@ -149,6 +224,11 @@ const items = [
                         label: 'Add Exam',
                         href: '/exam/create',
                     },
+                    {
+                        key: 'exam-results',
+                        label: 'Exam Results',
+                        href: '/exam/results',
+                    },
                 ],
             },
             {
@@ -156,7 +236,18 @@ const items = [
                 label: 'Assessments',
                 icon: NotebookPen,
                 href: '/assessments',
-                subItems: [],
+                subItems: [
+                    {
+                        key: 'assessments',
+                        label: 'All Assessments',
+                        href: '/assessments',
+                    },
+                    {
+                        key: 'new-assessments',
+                        label: 'New Assessments',
+                        href: '/assessment/create',
+                    },
+                ],
             },
             {
                 key: 'reports',
@@ -170,30 +261,44 @@ const items = [
                 label: 'Announcements',
                 icon: Newspaper,
                 href: '/announcements',
-                subItems: [],
+                subItems: [
+                    {
+                        key: 'announcements',
+                        label: 'All Announcements',
+                        href: '/announcements',
+                    },
+                    {
+                        key: 'add-announcement',
+                        label: 'Add Announcement',
+                        href: '/announcement/create',
+                    },
+                ],
             },
         ],
     },
     {
-        group: 'HR',
+        group: 'Billing',
         groupItems: [
             {
-                key: 'employee',
-                label: 'Employees',
-                icon: Users,
-                href: '/employee',
-                subItems: [
-                    {
-                        key: 'all-employees',
-                        label: 'All Employees',
-                        href: '/employees',
-                    },
-                    {
-                        key: 'add-employee',
-                        label: 'Add Employee',
-                        href: '/employee/add',
-                    },
-                ],
+                key: 'billing',
+                label: 'Billing',
+                icon: Banknote,
+                href: '/billings',
+                subItems: [],
+            },
+            {
+                key: 'invoices',
+                label: 'Invoices',
+                icon: Banknote,
+                href: '/invoices',
+                subItems: [],
+            },
+            {
+                key: 'receipts',
+                label: 'Receipts',
+                icon: Receipt,
+                href: '/receipts',
+                subItems: [],
             },
         ],
     },
@@ -204,40 +309,102 @@ const items = [
                 key: 'school_profile',
                 label: 'School Profile',
                 icon: School,
-                href: '/settings/school_profile',
-                subItems: [],
+                href: '/school_profile',
+                subItems: [
+                    {
+                        key: 'branch',
+                        label: 'Branches',
+                        href: '/branches',
+                    },
+                ],
             },
             {
                 key: 'academic_year',
                 label: 'Academic Year',
                 icon: Calendar,
-                href: '/settings/academic_year/create',
+                href: '/academic_years/create',
                 subItems: [],
             },
             {
                 key: 'fees',
-                label: 'Fees & Charges',
+                label: 'Fees & Packages',
                 icon: Banknote,
-                href: '/settings/fees',
+                href: '/fees',
+                subItems: [
+                    {
+                        key: 'fees',
+                        label: 'Fees',
+                        href: '/fees',
+                        subItems: [],
+                    },
+                    {
+                        key: 'packages',
+                        label: 'Packages',
+                        href: '/packages',
+                        subItems: [],
+                    },
+                    {
+                        key: 'new_packages',
+                        label: 'New Package',
+                        href: '/packages/create',
+                        subItems: [],
+                    },
+                ],
+            },
+            {
+                key: 'grades',
+                label: 'Grades',
+                icon: BookOpen,
+                href: '/grades',
                 subItems: [],
             },
             {
                 key: 'users',
                 label: 'Manage Users',
                 icon: Users,
-                href: '/settings/users',
+                href: '/users',
                 subItems: [
                     {
-                        key: 'roles',
-                        label: 'Roles',
-                        href: '/settings/users/roles',
+                        key: 'all-users',
+                        label: 'Users',
+                        href: '/users',
                     },
                     {
-                        key: 'permissions',
-                        label: 'Permissions',
-                        href: '/settings/users/permissions',
+                        key: 'new-users',
+                        label: 'New User',
+                        href: '/users/create',
+                    },
+                    {
+                        key: 'positions',
+                        label: 'Positions',
+                        href: '/positions',
+                    },
+                    {
+                        key: 'user-view',
+                        label: '',
+                        href: '/users/:id',
                     },
                 ],
+            },
+            {
+                key: 'roles',
+                label: 'Roles & Permissions',
+                icon: User,
+                href: '/roles',
+                subItems: [
+                    {
+                        key: 'all-roles',
+                        label: 'Roles',
+                        href: '/roles',
+                    },
+                ],
+            },
+            {
+                key: 'integration',
+                label: 'Integrations',
+                icon: MonitorCog,
+                href: '/integrations',
+                subItems: [],
             },
         ],
     },
@@ -245,6 +412,50 @@ const items = [
 export function AppSidebar() {
     const { state, isMobile } = useSidebar();
     const { url, props } = usePage();
+    const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
+        {},
+    );
+
+    useEffect(() => {
+        const initialExpanded: Record<string, boolean> = {};
+
+        items.forEach((group) => {
+            group.groupItems.forEach((item) => {
+                const isActive =
+                    url === item.href ||
+                    url.startsWith(item.href + '/') ||
+                    item.subItems.some(
+                        (subItem) =>
+                            url === subItem.href ||
+                            (subItem.href.includes('/:') &&
+                                url.startsWith(subItem.href.split('/:')[0])),
+                    );
+
+                if (isActive) {
+                    initialExpanded[item.key] = true;
+                }
+            });
+        });
+
+        setExpandedItems(initialExpanded);
+    }, [url]);
+
+    const toggleExpand = (key: string) => {
+        setExpandedItems((prev) => ({
+            ...prev,
+            [key]: !prev[key],
+        }));
+    };
+
+    const isActive = (href: string) => {
+        // console.log(url, href, url.startsWith(href.slice(0, -1)));
+        return (
+            url === href ||
+            (href !== '/' && url.startsWith(href + '/')) ||
+            (href.endsWith('/') && url.startsWith(href.slice(0, -1)))
+            // url.startsWith(href.slice(0, -1))
+        );
+    };
 
     return (
         <Sidebar side="left" collapsible="icon" variant="sidebar">
@@ -280,10 +491,9 @@ export function AppSidebar() {
                                                 defaultOpen={
                                                     groupItem.subItems &&
                                                     groupItem.subItems.some(
-                                                        (g) => g.href === url,
+                                                        (g: SubItem) =>
+                                                            isActive(g.href),
                                                     )
-                                                        ? true
-                                                        : false
                                                 }
                                             >
                                                 <CollapsibleTrigger asChild>
@@ -292,15 +502,12 @@ export function AppSidebar() {
                                                             tooltip={
                                                                 groupItem.label
                                                             }
-                                                            isActive={
-                                                                groupItem.subItems.some(
-                                                                    (g) =>
-                                                                        g.href ===
-                                                                        url,
-                                                                )
-                                                                    ? true
-                                                                    : false
-                                                            }
+                                                            isActive={groupItem.subItems.some(
+                                                                (g) =>
+                                                                    isActive(
+                                                                        g.href,
+                                                                    ),
+                                                            )}
                                                         >
                                                             <groupItem.icon />
                                                             {groupItem.label}
@@ -314,31 +521,38 @@ export function AppSidebar() {
                                                         {groupItem.subItems.map(
                                                             (subItem) => {
                                                                 return (
-                                                                    <SidebarMenuSubItem
-                                                                        key={
-                                                                            subItem.key
-                                                                        }
-                                                                    >
-                                                                        <SidebarMenuSubButton
-                                                                            asChild
-                                                                            isActive={
-                                                                                url ===
-                                                                                subItem.href
+                                                                    subItem.label !==
+                                                                        '' && (
+                                                                        <SidebarMenuSubItem
+                                                                            key={
+                                                                                subItem.key
                                                                             }
                                                                         >
-                                                                            <Link
-                                                                                href={
+                                                                            <SidebarMenuSubButton
+                                                                                asChild
+                                                                                isActive={
+                                                                                    url ===
                                                                                     subItem.href
+                                                                                    //     ||
+                                                                                    // isActive(
+                                                                                    //     subItem.href,
+                                                                                    // )
                                                                                 }
                                                                             >
-                                                                                <span>
-                                                                                    {
-                                                                                        subItem.label
+                                                                                <Link
+                                                                                    href={
+                                                                                        subItem.href
                                                                                     }
-                                                                                </span>
-                                                                            </Link>
-                                                                        </SidebarMenuSubButton>
-                                                                    </SidebarMenuSubItem>
+                                                                                >
+                                                                                    <span>
+                                                                                        {
+                                                                                            subItem.label
+                                                                                        }
+                                                                                    </span>
+                                                                                </Link>
+                                                                            </SidebarMenuSubButton>
+                                                                        </SidebarMenuSubItem>
+                                                                    )
                                                                 );
                                                             },
                                                         )}

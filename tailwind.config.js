@@ -9,6 +9,7 @@ export default {
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
         './resources/js/**/*.tsx',
+        './node_modules/@heroui/theme/dist/components/(calendar|chip|date-input|button|ripple|spinner|form).js',
     ],
 
     theme: {
@@ -88,6 +89,5 @@ export default {
             },
         },
     },
-
-    plugins: [forms, require('tailwindcss-animate')],
+    plugins: [forms, require('tailwindcss-animate'), heroui()],
 };

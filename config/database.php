@@ -82,6 +82,40 @@ return [
             ]) : [],
         ],
 
+        'central' => [
+            'driver' => 'mysql',
+            'url' => env('CENTRAL_DB_URL'),
+            'host' => env('CENTRAL_DB_HOST', '127.0.0.1'),
+            'port' => env('CENTRAL_DB_PORT', '3306'),
+            'database' => env('CENTRAL_DB_DATABASE', ''),
+            'username' => env('CENTRAL_DB_USERNAME', 'root'),
+            'password' => env('CENTRAL_DB_PASSWORD', ''),
+            'unix_socket' => env('CENTRAL_DB_SOCKET', ''),
+            'charset' => env('CENTRAL_DB_CHARSET', 'utf8mb4'),
+            'collation' => env('CENTRAL_DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => env('CENTRAL_PREFIX', ''),
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
+        'tenant' => [
+            'driver' => 'mysql',
+            'host' => env('TENANT_DB_HOST', '127.0.0.1'),
+            'port' => env('TENANT_DB_PORT', '3306'),
+            'database' => 'placeholder_db', // will be replaced at runtime
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
@@ -93,7 +127,7 @@ return [
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
-            'prefix' => '',
+            'prefix' => 'tenant_',
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,

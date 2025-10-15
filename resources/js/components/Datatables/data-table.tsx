@@ -1,4 +1,11 @@
-// components/LaravelReactTable.tsx
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { useTable } from '@/hooks/useTable';
 import { TableOptions } from '@/types';
 import {
@@ -10,17 +17,27 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
+import { X } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
 
+type FilterConfig = {
+    key: string;
+    label: string;
+    options: any[];
+};
 interface DataTableProps<T> {
     columns: ColumnDef<T>[];
     endpoint: string;
     options?: TableOptions;
+    filterConfig?: FilterConfig[];
 }
 
 export function DataTable<T>({
     columns,
     endpoint,
     options = {},
+    filterConfig = [],
 }: DataTableProps<T>) {
     const {
         columns: tableColumns,
@@ -66,11 +83,11 @@ export function DataTable<T>({
             {/* Search and Filters */}
             <div className="flex flex-wrap items-center gap-4">
                 {showSearch && (
-                    <div className="w-full md:w-auto">
+                    <div className="flex w-full flex-row items-center gap-2 md:w-auto">
                         <label htmlFor="search" className="sr-only">
                             Search
                         </label>
-                        <input
+                        <Input
                             type="text"
                             id="search"
                             placeholder="Search..."
@@ -78,26 +95,60 @@ export function DataTable<T>({
                             onChange={(e) => setSearch(e.target.value)}
                             className="rounded-md border px-4 py-2"
                         />
+                        <div>
+                            {search.length > 0 && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setSearch('')}
+                                >
+                                    <X size={20} className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 )}
 
                 {showFilters && (
                     <div className="flex flex-wrap gap-2">
-                        {/* Example filter - customize based on your needs */}
-                        <select
-                            value={filters.status || ''}
-                            onChange={(e) =>
-                                setFilters({
-                                    ...filters,
-                                    status: e.target.value || undefined,
-                                })
-                            }
-                            className="rounded-md border px-4 py-2"
-                        >
-                            <option value="">All Statuses</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
+                        {filterConfig.map((f: FilterConfig) => (
+                            <div key={f.key}>
+                                <Select
+                                    value={
+                                        Object.keys(filters).length !== 0
+                                            ? filters[f.key] || filters[0]
+                                            : f.options.length === 1
+                                              ? f.options[0].id
+                                              : ''
+                                    }
+                                    onValueChange={(value) =>
+                                        setFilters({
+                                            ...filters,
+                                            [f.key]: value,
+                                        })
+                                    }
+                                    required
+                                >
+                                    <SelectTrigger className="mt-1 flex w-full">
+                                        <SelectValue
+                                            placeholder={`Select ${f.label}`}
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            {f?.options.map((option) => (
+                                                <SelectItem
+                                                    key={option.id}
+                                                    value={option.id}
+                                                >
+                                                    {option.value}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>
@@ -112,7 +163,7 @@ export function DataTable<T>({
                                     <th
                                         key={header.id}
                                         scope="col"
-                                        className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
+                                        className="px-6 py-3 text-left text-xs font-bold tracking-wider text-gray-500"
                                         onClick={header.column.getToggleSortingHandler()}
                                     >
                                         <div className="flex cursor-pointer items-center">
@@ -157,7 +208,7 @@ export function DataTable<T>({
                                     {row.getVisibleCells().map((cell) => (
                                         <td
                                             key={cell.id}
-                                            className="px-6 py-4 whitespace-nowrap"
+                                            className="px-6 py-3 text-sm whitespace-nowrap"
                                         >
                                             {flexRender(
                                                 cell.column.columnDef.cell,
@@ -183,20 +234,47 @@ export function DataTable<T>({
                     </div>
 
                     <div className="flex gap-2">
-                        <button
+                        <Button
+                            variant="outline"
+                            size={'sm'}
                             onClick={() => table.previousPage()}
                             disabled={!table.getCanPreviousPage()}
                             className="rounded-md border px-4 py-2 disabled:opacity-50"
                         >
                             Previous
-                        </button>
-                        <button
+                        </Button>
+                        <div className="flex gap-1">
+                            {Array.from(
+                                { length: table.getPageCount() },
+                                (_, index) => (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        key={index}
+                                        onClick={() =>
+                                            table.setPageIndex(index)
+                                        }
+                                        className={`rounded-md border bg-white px-4 py-2 hover:text-[#F06F40] ${
+                                            table.getState().pagination
+                                                .pageIndex === index
+                                                ? 'bg-[#F06F40] text-white opacity-80'
+                                                : 'text-gray-700'
+                                        }`}
+                                    >
+                                        {index + 1}
+                                    </Button>
+                                ),
+                            )}
+                        </div>
+                        <Button
+                            variant="outline"
+                            size={'sm'}
                             onClick={() => table.nextPage()}
                             disabled={!table.getCanNextPage()}
                             className="rounded-md border px-4 py-2 disabled:opacity-50"
                         >
                             Next
-                        </button>
+                        </Button>
                     </div>
 
                     <select
@@ -204,7 +282,7 @@ export function DataTable<T>({
                         onChange={(e) => {
                             table.setPageSize(Number(e.target.value));
                         }}
-                        className="rounded-md border px-4 py-2"
+                        className="rounded-md border px-4 py-1 text-sm"
                     >
                         {[10, 20, 30, 40, 50].map((pageSize) => (
                             <option key={pageSize} value={pageSize}>

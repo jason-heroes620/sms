@@ -28,6 +28,7 @@ return [
 
     'env' => env('APP_ENV', 'production'),
 
+    'domain' => env('APP_DOMAIN', 'localhost'),
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode
@@ -52,7 +53,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'http://192.168.100.191:8000'),
 
     /*
     |--------------------------------------------------------------------------

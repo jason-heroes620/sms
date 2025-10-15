@@ -1,6 +1,6 @@
 import ApplicationLogo from '@/components/ApplicationLogo';
 import Dropdown from '@/components/Dropdown';
-import Loading from '@/components/Loading';
+import Loading from '@/components/loading';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink';
 import { AppSidebar } from '@/components/sidebar/app-sidebar';
 import {
@@ -47,7 +47,7 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
                                     <div className="flex">
                                         <div className="flex flex-row items-center gap-4">
                                             <SidebarTrigger />
-                                            <Link href="/dashboard">
+                                            <Link href="/admin">
                                                 <ApplicationLogo size={60} />
                                             </Link>
                                         </div>
@@ -222,7 +222,12 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
                             </div>
                         </nav>
                     </header>
-                    <main>{loading ? <Loading /> : children}</main>
+                    <main className="relative min-h-[600px] rounded-lg border p-4">
+                        {loading && <Loading />}
+                        <div className="md:px-4 md:py-4">
+                            {!loading && children}
+                        </div>
+                    </main>
                 </SidebarInset>
             </SidebarProvider>
             <Toaster />

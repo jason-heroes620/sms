@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SchoolProfile;
+use App\Models\Tenant\SchoolProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Exceptions;
 use Inertia\Inertia;
@@ -30,7 +30,7 @@ class SchoolProfileController extends Controller
                 'school_address.postcode' => 'nullable|string|max:10',
                 'school_address.state' => 'nullable|string|max:50',
                 'school_address.country' => 'nullable|string|max:50',
-                'school_contact_no' => 'required|string|max:20',
+                'school_contactNo' => 'required|string|max:20',
                 'school_email' => 'required|email|max:150',
                 'school_logo' => 'nullable|image|max:2048',
             ]);
@@ -46,7 +46,7 @@ class SchoolProfileController extends Controller
                 ['school_profile_id' => $uid], // Assuming there's only one profile
                 [
                     'school_name' => $validated['school_name'],
-                    'school_contact_no' => $validated['school_contact_no'],
+                    'school_contact_no' => $validated['school_nontact_no'],
                     'school_email' => $validated['school_email'],
                     'school_address' => $validated['school_address'],
                     'school_profile_id' => $uid
@@ -55,7 +55,7 @@ class SchoolProfileController extends Controller
 
             return response()->json(['success', 'School profile created successfully.']);
         } catch (Exceptions $e) {
-            return response()->json('error', 'Failed to update school profile: ' . $e);
+            return response()->json(['error', 'Failed to update school profile: ' . $e]);
         }
     }
 }
