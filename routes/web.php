@@ -32,7 +32,7 @@ use App\Http\Controllers\StudentPackageController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\UserController;
-
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -49,6 +49,12 @@ Route::get('/', function () {
 //         return Inertia::render('AdminDashboard');
 //     })->middleware(['auth', 'verified'])->name('admin.dashboard');
 // });
+
+Route::get('/clear-cache', function () {
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('route:clear');
+});
 
 
 Route::middleware('auth')->group(function () {
