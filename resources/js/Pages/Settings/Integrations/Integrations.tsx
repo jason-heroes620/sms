@@ -22,6 +22,7 @@ type IntegrationKeys = {
         integration: string;
         token: string;
         subdomain: string;
+        integration_status: string;
     };
     accounts: Account[];
     tax_codes: Tax[];
@@ -65,43 +66,47 @@ const Integrations = ({
             <Head title="Integrations" />
             <div className="mx-auto">
                 <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
-                    <div className="flex items-center justify-between p-4 text-gray-900 dark:text-gray-100">
+                    <div className="flex items-center p-4 text-gray-900 dark:text-gray-100">
                         <div>
                             <span className="font-bold">Integration </span>
                         </div>
                     </div>
                 </div>
                 <div className="py-8">
-                    <div className="w-full">
-                        <Tabs
-                            defaultValue={activeTab}
-                            onValueChange={setActiveTab}
-                            className="w-full"
-                        >
-                            <TabsList>
-                                <TabsTrigger value="account">
-                                    Integration Accounts
-                                </TabsTrigger>
-                                <TabsTrigger value="configurations">
-                                    Configurations
-                                </TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="account">
-                                <div className="flex flex-col gap-4 rounded-md border px-4 py-4">
+                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
+                        <div className="px-4 py-4">
+                            <Tabs
+                                defaultValue={activeTab}
+                                onValueChange={setActiveTab}
+                            >
+                                <TabsList>
+                                    <TabsTrigger value="account">
+                                        Integration Accounts
+                                    </TabsTrigger>
+                                    <TabsTrigger value="configurations">
+                                        Configurations
+                                    </TabsTrigger>
+                                </TabsList>
+                                <TabsContent
+                                    value="account"
+                                    className="flex flex-col gap-4"
+                                >
                                     <Payroll payroll={payroll} />
                                     <Jibble jibble={jibble} />
                                     <Bukku bukku={bukku} />
-                                </div>
-                            </TabsContent>
-                            <TabsContent value="configurations">
-                                <Configurations
-                                    accounts={accounts}
-                                    tax_codes={tax_codes}
-                                    terms={terms}
-                                    account_receivables={account_receivables}
-                                />
-                            </TabsContent>
-                        </Tabs>
+                                </TabsContent>
+                                <TabsContent value="configurations">
+                                    <Configurations
+                                        accounts={accounts}
+                                        tax_codes={tax_codes}
+                                        terms={terms}
+                                        account_receivables={
+                                            account_receivables
+                                        }
+                                    />
+                                </TabsContent>
+                            </Tabs>
+                        </div>
                     </div>
                 </div>
             </div>

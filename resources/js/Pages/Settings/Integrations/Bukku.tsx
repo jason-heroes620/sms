@@ -2,7 +2,6 @@ import Checkbox from '@/components/Checkbox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { toast } from 'sonner';
@@ -35,8 +34,11 @@ const Bukku = ({ bukku }: { bukku: Bukku }) => {
         });
     };
     return (
-        <form onSubmit={handleSubmit} className="w-full md:w-1/2">
-            <div className="rounded-md border px-4 py-4">
+        <div className="w-full md:w-2/3">
+            <form
+                onSubmit={handleSubmit}
+                className="flex flex-col rounded-md border px-4 py-4"
+            >
                 <div className="flex justify-between py-4">
                     <Label className="text-lg font-bold">Bukku</Label>
                     <div className="flex flex-row items-center gap-2">
@@ -58,19 +60,22 @@ const Bukku = ({ bukku }: { bukku: Bukku }) => {
                     </div>
                 </div>
                 <div className="mb-4">
-                    <Label className="block text-sm font-medium text-gray-700">
+                    <Label className="text-sm font-medium text-gray-700">
                         Token
                     </Label>
-                    <Textarea
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        value={data.token}
-                        onChange={(e) => setData('token', e.target.value)}
-                        disabled={
-                            data.integration_status === 'disabled'
-                                ? true
-                                : false
-                        }
-                    />
+                    <div>
+                        <textarea
+                            className="mt-1 block w-full rounded-md border-gray-300 px-2 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:opacity-50 sm:text-sm"
+                            value={data.token}
+                            onChange={(e) => setData('token', e.target.value)}
+                            disabled={
+                                data.integration_status === 'disabled'
+                                    ? true
+                                    : false
+                            }
+                            rows={5}
+                        />
+                    </div>
                 </div>
                 <div className="mb-4">
                     <Label className="block text-sm font-medium text-gray-700">
@@ -97,8 +102,8 @@ const Bukku = ({ bukku }: { bukku: Bukku }) => {
                         {processing ? 'Saving...' : 'Save'}
                     </Button>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     );
 };
 

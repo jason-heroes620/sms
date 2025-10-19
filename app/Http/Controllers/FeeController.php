@@ -28,10 +28,10 @@ class FeeController extends Controller
                 'label' => 'One Time'
             ],
             ['value' => 'monthly', 'label' => 'Montly'],
-            [
-                'value' => 'semester',
-                'label' => 'Semester'
-            ],
+            // [
+            //     'value' => 'semester',
+            //     'label' => 'Semester'
+            // ],
             [
                 'value' => 'annual',
                 'label' => 'Annual'

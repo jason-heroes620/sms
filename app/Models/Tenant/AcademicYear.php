@@ -21,6 +21,10 @@ class AcademicYear extends Model
         'created_by'
     ];
 
+    protected $casts = [
+        'is_current' => 'boolean'
+    ];
+
     public function classes()
     {
         return $this->hasMany(Classes::class);
@@ -29,15 +33,15 @@ class AcademicYear extends Model
     // Set only one year as current
     public static function setCurrent($id)
     {
-        self::query()->update(['is_current' => 'false']);
+        self::query()->update(['is_current' => false]);
         $year = self::findOrFail($id);
-        $year->is_current = 'true';
+        $year->is_current = true;
         $year->save();
         return $year;
     }
 
     public function scopeActive($query)
     {
-        return $query->where('is_current', 'true');
+        return $query->where('is_current', true);
     }
 }

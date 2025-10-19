@@ -61,18 +61,18 @@ class GradeController extends Controller
         // Redirect or return response
         try {
             $request->validate([
-                'gradeName' => 'required|string|max:255',
-                'minMark' => 'required|numeric',
-                'maxMark' => 'required|numeric|gte:minMark',
-                'gradeRemark' => 'nullable|string|max:255',
-                'gradeOrder' => 'required|integer',
+                'grade_name' => 'required|string|max:20',
+                'min_mark' => 'required|numeric',
+                'max_mark' => 'required|numeric|gte:min_mark',
+                'grade_remark' => 'nullable|string',
+                'grade_order' => 'required|integer',
             ]);
             Grades::create([
-                'grade_name' => $request->gradeName,
-                'min_mark' => $request->minMark,
-                'max_mark' => $request->maxMark,
-                'grade_remark' => $request->gradeRemark,
-                'grade_order' => $request->gradeOrder,
+                'grade_name' => $request->grade_name,
+                'min_mark' => $request->min_mark,
+                'max_mark' => $request->max_mark,
+                'grade_remark' => $request->grade_remark,
+                'grade_order' => $request->grade_order,
             ]);
             return redirect()->back()->with('success', 'Grade created successfully.');
         } catch (Exceptions $e) {
@@ -83,10 +83,8 @@ class GradeController extends Controller
     public function edit($id)
     {
         // Fetch the grade by ID and return the edit view
-        $grade = Grades::findOrFail($id);
-        return Inertia::render('grades.edit', [
-            'grade' => $grade,
-        ]);
+        $grade = Grades::find($id);
+        return response()->json($grade);
     }
 
     public function update(Request $request, $id)
@@ -109,7 +107,7 @@ class GradeController extends Controller
                 'grade_remark' => $request->grade_remark,
                 'grade_order' => $request->grade_order,
             ]);
-            return redirect()->route('grades.index')->with('success', 'Grade updated successfully.');
+            return redirect()->back()->with('success', 'Grade updated successfully.');
         } catch (Exceptions $e) {
             return redirect()->back()->with('error', 'Failed to update grade: ' . $e);
         }

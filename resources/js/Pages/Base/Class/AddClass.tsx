@@ -15,7 +15,7 @@ const AddClass = ({
     const { data, setData, post, errors, processing } = useForm({
         academic_year_id: academic_years
             ? academic_years.find((a: AcademicYear) => {
-                  return a.is_current === 'true' ? a.academic_year_id : '';
+                  return a.is_current ? a.academic_year_id : '';
               })?.academic_year_id
             : '',
         class_name: '',

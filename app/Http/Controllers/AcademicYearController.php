@@ -78,7 +78,7 @@ class AcademicYearController extends Controller
                 'academic_year' => $request->input('academic_year'),
                 'start_date' => $request->input('start_date'),
                 'end_date' => $request->input('end_date'),
-                'is_current' => $request->input('is_current') == true ? 'true' : 'false',
+                'is_current' => $request->input('is_current'),
                 'created_by' => $user
             ]);
 
@@ -98,14 +98,9 @@ class AcademicYearController extends Controller
 
     public function edit($id)
     {
-        // Logic to retrieve the academic year by ID
+        $academicYear = AcademicYear::find($id);
 
-        return inertia('Settings/AcademicYears/EditAcademicYear', [
-            'academicYear' => [
-                'id' => $id,
-                // Other fields to be passed to the view
-            ],
-        ]);
+        return response()->json($academicYear);
     }
 
     public function update(Request $request, $id)
@@ -116,9 +111,11 @@ class AcademicYearController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
+        $academicYear = AcademicYear::find($id);
+        $academicYear->update($request->all());
         // Logic to update the academic year in the database
 
-        return redirect()->route('academic-year')->with('success', 'Academic Year updated successfully.');
+        return redirect()->back()->with('success', 'Academic Year updated successfully.');
     }
 
     public function updateIsCurrent(Request $request)

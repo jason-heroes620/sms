@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('academic_year', 30);
             $table->date('start_date');
             $table->date('end_date');
-            $table->enum('is_current', ['true', 'false'])->default('false');
+            $table->boolean('is_current')->default('false');
             $table->string('created_by', 36);
             $table->timestamps();
 

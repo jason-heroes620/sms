@@ -15,19 +15,10 @@ return new class extends Migration
             $table->uuid('homework_submission_id')->primary();
             $table->uuid('homework_id');
             $table->uuid('student_id');
-            $table->datetime('submission_date');
-            $table->string('homework_path')->nullable();
             $table->text('comments')->nullable();
             $table->decimal('marks', 5, 2)->nullable();
             $table->uuid('commented_by')->nullable();
             $table->timestamps();
-
-            // $table->foreign('homework_id')->references('homework_id')->on('homeworks')->onDelete('cascade');
-            // $table->foreign('student_id')->references('student_id')->on('students')->onDelete('cascade');
-            // $table->foreign('commented_by')->references('id')->on('users')->onDelete('set null');
-
-            // $table->index(['homework_id', 'student_id']);
-            // $table->index(['submission_date']);
         });
     }
 

@@ -15,7 +15,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { BranchType, Classes } from '@/types';
+import { BranchType, Classes, Section } from '@/types';
 import { CalendarIcon } from 'lucide-react';
 import moment from 'moment';
 import { useState } from 'react';
@@ -32,6 +32,7 @@ interface SubjectHomeworkFormProps {
         homework_date: string;
         subject_id: string;
         class_id: string;
+        section_id: string;
         branch_id?: string;
     };
     setData: (field: string, value: unknown) => void;
@@ -63,11 +64,17 @@ const HomeworkForm = ({
     const [classByBranch, setClassByBranch] = useState(
         branch !== '' ? classes.filter((c) => c.branch_id === branch) : [],
     );
+    const [sectionByClass, setSectionByClass] = useState<Section[]>(
+        data.class_id
+            ? classes.filter((c) => c.class_id === data.class_id)[0].section
+            : [],
+    );
     const [subjects, setSubjects] = useState<Subject[]>(
         data.class_id
             ? classes.filter((c) => c.class_id === data.class_id)[0].subjects
             : [],
     );
+
     const filterClassByBranch = (value: string) => {
         setClassByBranch(classes.filter((c) => c.branch_id === value));
     };
@@ -75,6 +82,7 @@ const HomeworkForm = ({
     const handleClassChange = (value: string) => {
         const c = classes.filter((c) => c.class_id === value)[0];
         setSubjects(c.subjects);
+        setSectionByClass(c.section);
     };
 
     return (
@@ -131,8 +139,6 @@ const HomeworkForm = ({
                         )}
                     </div>
                 </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 md:gap-6">
                 <div className="mb-4">
                     <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Branch
@@ -162,6 +168,9 @@ const HomeworkForm = ({
                         </SelectContent>
                     </Select>
                 </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 md:gap-6">
                 <div className="mb-4">
                     <label
                         htmlFor="section_name"
@@ -201,6 +210,46 @@ const HomeworkForm = ({
                     {errors.class_id && (
                         <p className="mt-2 text-sm text-red-600">
                             {errors.class_id}
+                        </p>
+                    )}
+                </div>
+                <div>
+                    <div className="mb-4">
+                        <label
+                            htmlFor="section"
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >
+                            Section <span className="text-red-500">*</span>
+                        </label>
+                        <Select
+                            value={data.section_id}
+                            onValueChange={(value) => {
+                                setData('section_id', value);
+                            }}
+                            required
+                        >
+                            <SelectTrigger className="mt-1 flex w-full border-gray-300 shadow-sm">
+                                <SelectValue placeholder="Select Section" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    {sectionByClass?.map((s: Section) => {
+                                        return (
+                                            <SelectItem
+                                                key={s.section_id}
+                                                value={s.section_id}
+                                            >
+                                                {s.section_name}
+                                            </SelectItem>
+                                        );
+                                    })}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {errors.section_id && (
+                        <p className="mt-2 text-sm text-red-600">
+                            {errors.section_id}
                         </p>
                     )}
                 </div>

@@ -1,6 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { MultiSelect } from '@/components/ui/multi-select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { RoleInfo } from '@/types';
 import { CircleX, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
@@ -49,7 +56,7 @@ const RoleForm = ({
     return (
         <div className="rounded-md border-gray-300 p-4 shadow-md">
             {userRole.map((u: RoleInfo) => (
-                <div key={u.role_id}>
+                <div key={u.id}>
                     <div className="mb-4">
                         <Label
                             htmlFor="branch"
@@ -74,8 +81,8 @@ const RoleForm = ({
                             Role{' '}
                             <span className="font-bold text-red-800">*</span>
                         </Label>
-                        {/* <Select
-                            value={u.id}
+                        <Select
+                            value={u.id.toString()}
                             onValueChange={(value) =>
                                 handleChange(u.role_id, 'id', value)
                             }
@@ -86,15 +93,15 @@ const RoleForm = ({
                             <SelectContent className="w-full">
                                 {roles.map((r: Role) => (
                                     <SelectItem
-                                        value={r.id}
+                                        value={r.id.toString()}
                                         key={`${u.role_id}-${r.id}`}
                                     >
                                         {r.name.toUpperCase()}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
-                        </Select> */}
-                        <select
+                        </Select>
+                        {/* <select
                             name=""
                             id=""
                             value={u.id}
@@ -112,7 +119,7 @@ const RoleForm = ({
                                     {r.name.toUpperCase()}
                                 </option>
                             ))}
-                        </select>
+                        </select> */}
                     </div>
                     {userRole.length > 1 && ( // Only show remove button if there's more than one entry
                         <div className="flex w-full items-center justify-end py-2 md:col-span-2">

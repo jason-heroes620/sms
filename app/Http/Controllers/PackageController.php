@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class PackageController extends Controller
@@ -104,6 +105,68 @@ class PackageController extends Controller
             return redirect()->back()->with('success', 'New Package added.');
         } catch (Exception $e) {
             Log::error('Error adding new package');
+            Log::error($e);
+
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function edit($id)
+    {
+        $packages = Packages::findOrFail($id);
+        $packages->fees = PackageFees::select('fees.fee_id', 'fee_label', 'uom', 'amount')
+            ->join('fees', 'fees.fee_id', '=', 'package_fees.fee_id')
+            ->where('package_id', $id)
+            ->get();
+        $fees = Fees::select('fee_id', 'fee_label', 'uom', 'amount')
+            ->where('fee_status', 'active')
+            ->get();
+        return Inertia::render('Settings/FeesAndCharges/EditPackages', compact('packages', 'fees'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'package_name' => [
+                    'required',
+                    'string',
+                    'max:100',
+                    Rule::unique(Packages::class)->ignore($request->id, 'package_id')
+                ],
+                'effective_start_date' => 'required|date',
+                'fees' => 'required|array|min:1'
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()
+                    ->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+            $package = Packages::find($id);
+            $package->update([
+                'package_name' => $request->input('package_name'),
+                'package_description' => $request->input('package_description'),
+                'package_price' => array_sum(array_column($request->input('fees'), 'amount')),
+                'effective_start_date' => $request->input('effective_start_date'),
+                'effective_end_date' => $request->input('effective_end_date'),
+                'recurring' => $request->input('recurring'),
+                'frequency' => $request->input('frequency'),
+                'package_status' => $request->input('package_status'),
+            ]);
+
+            if ($request->input('package_status') === 'active') {
+                $package->update(
+                    [
+                        'effective_end_date' => null,
+                    ]
+                );
+            }
+
+            return redirect()->back()->with('success', 'Package updated.');
+        } catch (Exception $e) {
+            Log::error('Error updating package');
             Log::error($e);
 
             return redirect()->back()->with('error', $e->getMessage());

@@ -1,21 +1,39 @@
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { BranchType, Classes } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
 import { CalendarIcon, CircleChevronLeft } from 'lucide-react';
 import moment from 'moment';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-const AddExam = () => {
+const AddExam = ({
+    branches,
+    classes,
+}: {
+    branches: BranchType[];
+    classes: Classes[];
+}) => {
     const { data, setData, post, processing, errors } = useForm({
+        branch_id: '',
+        class_id: '',
         exam_name: '',
         exam_description: '',
         start_date: '',
@@ -24,6 +42,21 @@ const AddExam = () => {
 
     const [openStartDate, setOpenStartDate] = useState(false);
     const [openEndDate, setOpenEndDate] = useState(false);
+
+    const [branch, setBranch] = useState(
+        branches && branches.length === 1
+            ? branches[0].branch_id
+            : data.branch_id
+              ? data.branch_id
+              : '',
+    );
+    const [classByBranch, setClassByBranch] = useState(
+        branch !== '' ? classes.filter((c) => c.branch_id === branch) : [],
+    );
+
+    const filterClassByBranch = (value: string) => {
+        setClassByBranch(classes.filter((c) => c.branch_id === value));
+    };
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -34,6 +67,8 @@ const AddExam = () => {
                     description: 'Subject added successfully.',
                 });
                 setData({
+                    branch_id: '',
+                    class_id: '',
                     exam_name: '',
                     exam_description: '',
                     start_date: '',
@@ -72,6 +107,99 @@ const AddExam = () => {
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
                         <div className="p-4">
                             <form onSubmit={handleSubmit}>
+                                <div className="grid grid-cols-1 md:grid-cols-3 md:gap-6">
+                                    <div className="mb-4">
+                                        <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Branch
+                                        </Label>
+                                        <Select
+                                            value={branch}
+                                            onValueChange={(value) => {
+                                                setBranch(value);
+                                                filterClassByBranch(value);
+                                            }}
+                                            required
+                                        >
+                                            <SelectTrigger className="mt-1 flex w-full border-gray-300 shadow-sm">
+                                                <SelectValue placeholder="Select Branch" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    {branches?.map(
+                                                        (
+                                                            branch: BranchType,
+                                                        ) => (
+                                                            <SelectItem
+                                                                key={
+                                                                    branch.branch_id
+                                                                }
+                                                                value={
+                                                                    branch.branch_id
+                                                                }
+                                                            >
+                                                                {
+                                                                    branch.branch_name
+                                                                }
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label
+                                            htmlFor="section_name"
+                                            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                                        >
+                                            Class{' '}
+                                            <span className="text-red-800">
+                                                *
+                                            </span>
+                                        </label>
+                                        <div className="">
+                                            <Select
+                                                value={data.class_id}
+                                                onValueChange={(value) => {
+                                                    setData('class_id', value);
+                                                }}
+                                                required
+                                            >
+                                                <SelectTrigger className="mt-1 flex w-full border-gray-300 shadow-sm">
+                                                    <SelectValue placeholder="Select Class" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectGroup>
+                                                        {classByBranch?.map(
+                                                            (c: Classes) => {
+                                                                return (
+                                                                    <SelectItem
+                                                                        key={
+                                                                            c.class_id
+                                                                        }
+                                                                        value={
+                                                                            c.class_id
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            c.class_name
+                                                                        }
+                                                                    </SelectItem>
+                                                                );
+                                                            },
+                                                        )}
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        {errors.class_id && (
+                                            <p className="mt-2 text-sm text-red-600">
+                                                {errors.class_id}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
                                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                                     <div className="mb-4">
                                         <label

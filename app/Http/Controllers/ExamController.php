@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Tenant\BranchClass;
+use App\Models\Tenant\Branches;
 use App\Models\Tenant\Exams;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,6 +12,18 @@ use Inertia\Inertia;
 
 class ExamController extends Controller
 {
+    protected $branchUser, $branches;
+
+    public function __construct(UserController $branchUser)
+    {
+        $user = Auth::id();
+        $this->branchUser = $branchUser;
+        $this->branches = Branches::select('branch_id', 'branch_name')
+            ->where('branch_status', 'active')
+            ->whereIn('branch_id', $this->branchUser->getUserBranchIds($user))
+            ->get();
+    }
+
     public function index()
     {
         return Inertia::render('Base/Exam/Exams', [
@@ -59,8 +73,11 @@ class ExamController extends Controller
 
     public function create()
     {
-        // This method should return a view for creating a new exam.
-        return Inertia::render('Base/Exam/AddExam');
+        $user = Auth::id();
+        $branches = $this->branches;
+        $classes = BranchClass::getCustomClassesByBranchIds($user);
+
+        return Inertia::render('Base/Exam/AddExam', compact('branches', 'classes'));
     }
 
     public function store(Request $request)

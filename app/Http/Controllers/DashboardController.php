@@ -13,7 +13,6 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-
     public function index()
     {
         $students = Students::where('student_status', 'active')->count();

@@ -35,7 +35,8 @@ import {
     User,
     Users,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { ScrollArea } from '../ui/scroll-area';
 
 type SubItem = {
     key: string;
@@ -200,6 +201,11 @@ const items = [
                         key: 'submissions',
                         label: 'Submissions',
                         href: '/homework-submissions',
+                    },
+                    {
+                        key: 'submissions',
+                        label: '',
+                        href: '/homework-submissions/:id',
                     },
                     {
                         key: 'homework-view',
@@ -416,6 +422,23 @@ export function AppSidebar() {
         {},
     );
 
+    const pathname = window.location.pathname ?? '/';
+
+    // 2. Create a ref to attach to the active element
+    const activeItemRef = useRef<HTMLAnchorElement>(null);
+
+    // 3. Effect hook to handle the scrolling
+    useEffect(() => {
+        // Check if the ref is attached to an element
+        if (activeItemRef.current) {
+            // Use the native scrollIntoView method
+            activeItemRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest', // Scrolls the element into the nearest visible area
+            });
+        }
+    }, [pathname]);
+
     useEffect(() => {
         const initialExpanded: Record<string, boolean> = {};
 
@@ -458,139 +481,162 @@ export function AppSidebar() {
     };
 
     return (
-        <Sidebar side="left" collapsible="icon" variant="sidebar">
-            <SidebarContent className="pt-4 md:pt-10">
-                <SidebarGroup>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            <SidebarMenuItem key={'dashboard'}>
-                                <SidebarMenuButton
-                                    asChild
-                                    tooltip={'Dashboard'}
-                                    isActive={url === '/dashboard'}
-                                >
-                                    <Link href={'/dashboard'}>
-                                        <LayoutDashboard />
-                                        Dashboard
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-                {items.map((item) => {
-                    return (
-                        <SidebarGroup key={item.group}>
-                            <SidebarGroupLabel>{item.group}</SidebarGroupLabel>
-                            {item.groupItems.map((groupItem) => {
-                                return (
-                                    <SidebarMenu key={groupItem.key}>
-                                        {groupItem.subItems.length > 0 ? (
-                                            <Collapsible
-                                                className="group/collapsible"
-                                                defaultOpen={
-                                                    groupItem.subItems &&
-                                                    groupItem.subItems.some(
-                                                        (g: SubItem) =>
-                                                            isActive(g.href),
-                                                    )
-                                                }
-                                            >
-                                                <CollapsibleTrigger asChild>
-                                                    <SidebarMenuItem>
-                                                        <SidebarMenuButton
-                                                            tooltip={
-                                                                groupItem.label
-                                                            }
-                                                            isActive={groupItem.subItems.some(
-                                                                (g) =>
-                                                                    isActive(
-                                                                        g.href,
-                                                                    ),
+        <ScrollArea>
+            <Sidebar side="left" collapsible="icon" variant="sidebar">
+                <SidebarContent className="pt-4 md:pt-10">
+                    <SidebarGroup>
+                        <SidebarGroupContent>
+                            <SidebarMenu>
+                                <SidebarMenuItem key={'dashboard'}>
+                                    <SidebarMenuButton
+                                        asChild
+                                        tooltip={'Dashboard'}
+                                        isActive={url === '/dashboard'}
+                                    >
+                                        <Link href={'/dashboard'}>
+                                            <LayoutDashboard />
+                                            Dashboard
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                    {items.map((item) => {
+                        return (
+                            <SidebarGroup key={item.group}>
+                                <SidebarGroupLabel>
+                                    {item.group}
+                                </SidebarGroupLabel>
+                                {item.groupItems.map((groupItem) => {
+                                    return (
+                                        <SidebarMenu key={groupItem.key}>
+                                            {groupItem.subItems.length > 0 ? (
+                                                <Collapsible
+                                                    className="group/collapsible"
+                                                    defaultOpen={
+                                                        groupItem.subItems &&
+                                                        groupItem.subItems.some(
+                                                            (g: SubItem) =>
+                                                                isActive(
+                                                                    g.href,
+                                                                ),
+                                                        )
+                                                    }
+                                                >
+                                                    <CollapsibleTrigger asChild>
+                                                        <SidebarMenuItem>
+                                                            <SidebarMenuButton
+                                                                tooltip={
+                                                                    groupItem.label
+                                                                }
+                                                                isActive={groupItem.subItems.some(
+                                                                    (g) =>
+                                                                        isActive(
+                                                                            g.href,
+                                                                        ),
+                                                                )}
+                                                            >
+                                                                <groupItem.icon />
+                                                                {
+                                                                    groupItem.label
+                                                                }
+                                                                <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                                                            </SidebarMenuButton>
+                                                        </SidebarMenuItem>
+                                                    </CollapsibleTrigger>
+
+                                                    <CollapsibleContent>
+                                                        <SidebarMenuSub>
+                                                            {groupItem.subItems.map(
+                                                                (subItem) => {
+                                                                    return (
+                                                                        subItem.label !==
+                                                                            '' && (
+                                                                            <SidebarMenuSubItem
+                                                                                key={
+                                                                                    subItem.key
+                                                                                }
+                                                                            >
+                                                                                <SidebarMenuSubButton
+                                                                                    asChild
+                                                                                    isActive={
+                                                                                        url ===
+                                                                                        subItem.href
+                                                                                    }
+                                                                                    ref={
+                                                                                        url ===
+                                                                                        subItem.href
+                                                                                            ? activeItemRef
+                                                                                            : null
+                                                                                    }
+                                                                                >
+                                                                                    <Link
+                                                                                        href={
+                                                                                            subItem.href
+                                                                                        }
+                                                                                    >
+                                                                                        <span>
+                                                                                            {
+                                                                                                subItem.label
+                                                                                            }
+                                                                                        </span>
+                                                                                    </Link>
+                                                                                </SidebarMenuSubButton>
+                                                                            </SidebarMenuSubItem>
+                                                                        )
+                                                                    );
+                                                                },
                                                             )}
+                                                        </SidebarMenuSub>
+                                                    </CollapsibleContent>
+                                                </Collapsible>
+                                            ) : (
+                                                <SidebarMenuItem>
+                                                    <SidebarMenuButton
+                                                        asChild
+                                                        tooltip={
+                                                            groupItem.label
+                                                        }
+                                                        isActive={
+                                                            url ===
+                                                            groupItem.href
+                                                        }
+                                                    >
+                                                        <Link
+                                                            ref={
+                                                                url ===
+                                                                groupItem.href
+                                                                    ? activeItemRef
+                                                                    : null
+                                                            }
+                                                            href={
+                                                                groupItem.href
+                                                            }
                                                         >
                                                             <groupItem.icon />
                                                             {groupItem.label}
-                                                            <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-                                                        </SidebarMenuButton>
-                                                    </SidebarMenuItem>
-                                                </CollapsibleTrigger>
-
-                                                <CollapsibleContent>
-                                                    <SidebarMenuSub>
-                                                        {groupItem.subItems.map(
-                                                            (subItem) => {
-                                                                return (
-                                                                    subItem.label !==
-                                                                        '' && (
-                                                                        <SidebarMenuSubItem
-                                                                            key={
-                                                                                subItem.key
-                                                                            }
-                                                                        >
-                                                                            <SidebarMenuSubButton
-                                                                                asChild
-                                                                                isActive={
-                                                                                    url ===
-                                                                                    subItem.href
-                                                                                    //     ||
-                                                                                    // isActive(
-                                                                                    //     subItem.href,
-                                                                                    // )
-                                                                                }
-                                                                            >
-                                                                                <Link
-                                                                                    href={
-                                                                                        subItem.href
-                                                                                    }
-                                                                                >
-                                                                                    <span>
-                                                                                        {
-                                                                                            subItem.label
-                                                                                        }
-                                                                                    </span>
-                                                                                </Link>
-                                                                            </SidebarMenuSubButton>
-                                                                        </SidebarMenuSubItem>
-                                                                    )
-                                                                );
-                                                            },
-                                                        )}
-                                                    </SidebarMenuSub>
-                                                </CollapsibleContent>
-                                            </Collapsible>
-                                        ) : (
-                                            <SidebarMenuItem>
-                                                <SidebarMenuButton
-                                                    asChild
-                                                    tooltip={groupItem.label}
-                                                    isActive={
-                                                        url === groupItem.href
-                                                    }
-                                                >
-                                                    <Link href={groupItem.href}>
-                                                        <groupItem.icon />
-                                                        {groupItem.label}
-                                                    </Link>
-                                                </SidebarMenuButton>
-                                            </SidebarMenuItem>
-                                        )}
-                                    </SidebarMenu>
-                                );
-                            })}
-                        </SidebarGroup>
-                    );
-                })}
-            </SidebarContent>
-            <SidebarFooter>
-                {state === 'expanded' && (
-                    <div className="flex justify-center">
-                        <span className="text-[10px]">
-                            &copy; HEROES Malaysia
-                        </span>
-                    </div>
-                )}
-            </SidebarFooter>
-        </Sidebar>
+                                                        </Link>
+                                                    </SidebarMenuButton>
+                                                </SidebarMenuItem>
+                                            )}
+                                        </SidebarMenu>
+                                    );
+                                })}
+                            </SidebarGroup>
+                        );
+                    })}
+                </SidebarContent>
+                <SidebarFooter>
+                    {state === 'expanded' && (
+                        <div className="flex justify-center">
+                            <span className="text-[10px]">
+                                &copy; HEROES Malaysia
+                            </span>
+                        </div>
+                    )}
+                </SidebarFooter>
+            </Sidebar>
+        </ScrollArea>
     );
 }

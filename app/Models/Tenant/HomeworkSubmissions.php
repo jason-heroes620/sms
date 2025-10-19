@@ -14,8 +14,6 @@ class HomeworkSubmissions extends Model
     protected $fillable = [
         'homework_id',
         'student_id',
-        'submission_date',
-        'homework_path',
         'comments',
         'marks',
         'commented_by',

@@ -1,16 +1,18 @@
 import { DataTable } from '@/components/Datatables/data-table';
+import EditSheet from '@/components/EditSheet';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Pencil, Trash } from 'lucide-react';
-import { toast } from 'sonner';
+import { MoreHorizontal } from 'lucide-react';
+import { useState } from 'react';
+import GradeForm from './GradeForm';
 
 type Grade = {
     grade_id: string;
@@ -46,49 +48,48 @@ export const columns: ColumnDef<Grade>[] = [
         },
     },
     {
-        id: 'actions',
+        header: 'Action',
         cell: ({ row }) => {
-            const grade = row.original;
+            const grades = row.original;
+            const [id, setId] = useState('');
+            const [isSheetOpen, setIsSheetOpen] = useState(false);
+            const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+            const editable = [''];
+            const handleEditClick = (id: string) => {
+                setIsDropdownOpen(false);
+                setIsSheetOpen(true);
+                setId(id);
+            };
 
             return (
-                <div className="flex items-center gap-2">
-                    <Tooltip>
-                        <TooltipTrigger className="cursor-pointer">
-                            <Button
-                                asChild
-                                variant="ghost"
-                                size="icon"
-                                className="h-[16px] w-[20px]"
-                                onClick={() =>
-                                    toast.info(
-                                        `Edit functionality for ${grade.grade_name} is not implemented yet.`,
-                                    )
-                                }
-                            >
-                                <Pencil color={'#F06F40'} size={2} />
+                <div>
+                    <DropdownMenu
+                        open={isDropdownOpen}
+                        onOpenChange={setIsDropdownOpen}
+                    >
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
                             </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Edit</TooltipContent>
-                    </Tooltip>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                                onSelect={(e) => {
+                                    e.preventDefault();
+                                    handleEditClick(grades.grade_id);
+                                }}
+                            >
+                                Edit
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
-                    <Tooltip>
-                        <TooltipTrigger className="cursor-pointer">
-                            <Button
-                                asChild
-                                variant="ghost"
-                                size="icon"
-                                className="h-[16px] w-[20px]"
-                                onClick={() =>
-                                    toast.error(
-                                        `Delete functionality for ${grade.grade_name} is not implemented yet.`,
-                                    )
-                                }
-                            >
-                                <Trash color={'red'} />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete</TooltipContent>
-                    </Tooltip>
+                    <EditSheet
+                        isSheetOpen={isSheetOpen}
+                        setIsSheetOpen={setIsSheetOpen}
+                    >
+                        <GradeForm id={id} editable={editable} />
+                    </EditSheet>
                 </div>
             );
         },
@@ -96,39 +97,6 @@ export const columns: ColumnDef<Grade>[] = [
 ];
 
 const Grades = () => {
-    const { data, setData, post, errors, processing } = useForm({
-        gradeName: '',
-        gradeRemark: '',
-        minMark: 0,
-        maxMark: 0,
-        gradeOrder: 1,
-    });
-
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
-        post(route('grade.store'), {
-            onSuccess: () => {
-                setData({
-                    gradeName: '',
-                    gradeRemark: '',
-                    minMark: 0,
-                    maxMark: 0,
-                    gradeOrder: 1,
-                });
-                // Handle success, e.g., show a success message or redirect
-                toast.success('Grade added successfully!', {
-                    description: 'The grade has been added to the system.',
-                });
-            },
-            onError: (errors) => {
-                // Handle errors, e.g., show an error message
-                toast.error('Failed to add grade.', {
-                    description: 'Please check the form for errors.',
-                });
-            },
-        });
-    };
-
     return (
         <AuthenticatedLayout>
             <Head title="Grades" />
@@ -151,188 +119,8 @@ const Grades = () => {
                                             Add New Grade
                                         </span>
                                         <hr />
+                                        <GradeForm />
                                     </div>
-                                    <form
-                                        onSubmit={handleSubmit}
-                                        className="py-4"
-                                    >
-                                        <div className="mb-4">
-                                            <label
-                                                htmlFor="gradeName"
-                                                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                            >
-                                                Grade Name{' '}
-                                                <span className="text-red-800">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <Input
-                                                type="text"
-                                                id="gradeName"
-                                                name="gradeName"
-                                                value={data.gradeName}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'gradeName',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="mt-1 block w-full rounded-md border-gray-300 px-2 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                                                required
-                                            />
-                                            {errors.gradeName && (
-                                                <p className="mt-2 text-sm text-red-600">
-                                                    {errors.gradeName}
-                                                </p>
-                                            )}
-                                        </div>
-
-                                        <div className="mb-4">
-                                            <label
-                                                htmlFor="minMark"
-                                                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                            >
-                                                Minimum Mark{' '}
-                                                <span className="text-red-800">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <Input
-                                                type="number"
-                                                id="minMark"
-                                                name="minMark"
-                                                value={data.minMark}
-                                                min={0}
-                                                max={100}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'minMark',
-                                                        parseInt(
-                                                            e.target.value,
-                                                        ),
-                                                    )
-                                                }
-                                                className="mt-1 block w-full rounded-md border-gray-300 px-2 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                                                required
-                                            />
-                                            {errors.minMark && (
-                                                <p className="mt-2 text-sm text-red-600">
-                                                    {errors.minMark}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="mb-4">
-                                            <label
-                                                htmlFor="maxMark"
-                                                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                            >
-                                                Maximum Mark{' '}
-                                                <span className="text-red-800">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <Input
-                                                type="number"
-                                                id="maxMark"
-                                                name="maxMark"
-                                                value={data.maxMark}
-                                                min={0}
-                                                max={100}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'maxMark',
-                                                        parseInt(
-                                                            e.target.value,
-                                                        ),
-                                                    )
-                                                }
-                                                className="mt-1 block w-full rounded-md border-gray-300 px-2 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                                                required
-                                            />
-                                            {errors.maxMark && (
-                                                <p className="mt-2 text-sm text-red-600">
-                                                    {errors.maxMark}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="mb-4">
-                                            <label
-                                                htmlFor="gradeRemark"
-                                                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                            >
-                                                Grade Remark{' '}
-                                                <span className="text-red-800">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <Input
-                                                type="text"
-                                                id="gradeRemark"
-                                                name="gradeRemark"
-                                                value={data.gradeRemark}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'gradeRemark',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="mt-1 block w-full rounded-md border-gray-300 px-2 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                                                required
-                                            />
-                                            {errors.gradeRemark && (
-                                                <p className="mt-2 text-sm text-red-600">
-                                                    {errors.gradeRemark}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="mb-4">
-                                            <label
-                                                htmlFor="gradeOrder"
-                                                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                            >
-                                                Grade Order{' '}
-                                                <span className="text-red-800">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <Input
-                                                type="number"
-                                                id="gradeOrder"
-                                                name="gradeOrder"
-                                                value={data.gradeOrder}
-                                                min={1}
-                                                max={100}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'gradeOrder',
-                                                        parseInt(
-                                                            e.target.value,
-                                                        ),
-                                                    )
-                                                }
-                                                className="mt-1 block w-full rounded-md border-gray-300 px-2 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
-                                                required
-                                            />
-                                            {errors.gradeOrder && (
-                                                <p className="mt-2 text-sm text-red-600">
-                                                    {errors.gradeOrder}
-                                                </p>
-                                            )}
-                                        </div>
-
-                                        <div className="flex justify-end py-4">
-                                            <Button
-                                                type="submit"
-                                                size={'sm'}
-                                                variant={'primary'}
-                                                disabled={processing}
-                                            >
-                                                {processing
-                                                    ? 'Saving ...'
-                                                    : 'Add'}
-                                            </Button>
-                                        </div>
-                                    </form>
                                 </div>
                             </div>
                             <div className="md:col-span-2">

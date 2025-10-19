@@ -8,7 +8,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
 import { Fee } from '@/types';
 import { formattedNumber } from '@/utils/formatNumber';
 import { Head } from '@inertiajs/react';
@@ -122,11 +121,6 @@ export const columns: ColumnDef<Fee>[] = [
                             >
                                 Edit
                             </DropdownMenuItem>
-                            {/* <DropdownMenuItem
-                                onClick={() => console.log(fee.fee_id)}
-                            >
-                                Set Inactive
-                            </DropdownMenuItem> */}
                         </DropdownMenuContent>
                     </DropdownMenu>
 

@@ -34,6 +34,7 @@ type PackageFormProps = {
 
 const PackageForm = ({ data, setData, fees, errors }: PackageFormProps) => {
     const [open, setOpen] = useState(false);
+    const [endOpen, setEndOpen] = useState(false);
 
     return (
         <div>
@@ -76,7 +77,7 @@ const PackageForm = ({ data, setData, fees, errors }: PackageFormProps) => {
                                         ? moment(
                                               data.effective_start_date,
                                           ).format('DD MMM YYYY')
-                                        : 'Pcik a date'}
+                                        : 'Pick a date'}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent
@@ -104,7 +105,7 @@ const PackageForm = ({ data, setData, fees, errors }: PackageFormProps) => {
                                 />
                             </PopoverContent>
                         </Popover>
-                        {errors.effecitve_start_date && (
+                        {errors.effective_start_date && (
                             <p className="mt-2 text-sm text-red-600 dark:text-red-400">
                                 {errors.effective_start_date}
                             </p>
@@ -171,7 +172,7 @@ const PackageForm = ({ data, setData, fees, errors }: PackageFormProps) => {
                                         }}
                                     />
                                     <div className="flex flex-col gap-1">
-                                        <Label className="text-md font-bold">
+                                        <Label className="text-sm font-bold">
                                             {f.fee_label}
                                         </Label>
                                         <span className="flex flex-row text-sm font-bold text-gray-700 dark:text-gray-300">
@@ -252,7 +253,7 @@ const PackageForm = ({ data, setData, fees, errors }: PackageFormProps) => {
                     )}
                 </div>
             </div>
-            <div className="flex">
+            <div className="flex w-full justify-end">
                 <div className="rounded-md border border-red-600 px-4 py-2 shadow-md">
                     <span>Package Total </span>
                     <span className="text-lg font-bold">
@@ -266,6 +267,108 @@ const PackageForm = ({ data, setData, fees, errors }: PackageFormProps) => {
                     </span>
                 </div>
             </div>
+            {data.package_status && (
+                <div className="flex md:grid md:grid-cols-3">
+                    <div className="mb-4 flex flex-col md:col-span-1">
+                        <label
+                            htmlFor="fee_type"
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >
+                            Status
+                            <span className="text-red-800"> *</span>
+                        </label>
+                        <Select
+                            value={data.package_status}
+                            onValueChange={(value) =>
+                                setData('package_status', value)
+                            }
+                            required
+                        >
+                            <SelectTrigger className="mt-1 flex w-full border-gray-300 shadow-sm">
+                                <SelectValue placeholder="Select Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectItem value={'active'} key={'active'}>
+                                        {'Active'}
+                                    </SelectItem>
+                                    <SelectItem
+                                        value={'inactive'}
+                                        key={'inactive'}
+                                    >
+                                        {'Inactive'}
+                                    </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        {errors.package_status && (
+                            <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {errors.package_status}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            )}
+            {data.package_status === 'inactive' && (
+                <div className="mb-4 flex md:grid md:grid-cols-3">
+                    <div className="mb-4 flex flex-col md:col-span-1">
+                        <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Effective End Date
+                        </Label>
+                        <div className="mt-1">
+                            <Popover open={endOpen} onOpenChange={setEndOpen}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        id="date"
+                                        className="w-full justify-start font-normal"
+                                    >
+                                        <CalendarIcon />
+                                        {data.effective_end_date
+                                            ? moment(
+                                                  data.effective_end_date,
+                                              ).format('DD MMM YYYY')
+                                            : 'Pick a date'}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                    className="w-60 overflow-hidden p-0"
+                                    align="start"
+                                >
+                                    <Calendar
+                                        mode="single"
+                                        captionLayout="dropdown"
+                                        startMonth={moment()
+                                            .subtract(2, 'years')
+                                            .toDate()}
+                                        endMonth={moment()
+                                            .add(2, 'years')
+                                            .toDate()}
+                                        selected={moment(
+                                            data.effective_end_date,
+                                        ).toDate()}
+                                        onSelect={(date) => {
+                                            setData(
+                                                'effective_end_date',
+                                                moment(date).format(
+                                                    'YYYY-MM-DD',
+                                                ),
+                                            );
+                                            setOpen(false);
+                                        }}
+                                        required
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                            {errors.effecitve_end_date && (
+                                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                                    {errors.effective_end_date}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

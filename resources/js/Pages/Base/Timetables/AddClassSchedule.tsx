@@ -30,7 +30,7 @@ const AddClassSchedule = ({
     const { data, setData, processing, errors, post } = useForm({
         academic_year_id: academic_years
             ? academic_years.find((a: AcademicYear) => {
-                  return a.is_current === 'true' ? a.academic_year_id : '';
+                  return a.is_current ? a.academic_year_id : '';
               }).academic_year_id
             : '',
         branch_id: '',

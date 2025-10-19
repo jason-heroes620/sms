@@ -132,12 +132,15 @@ export type Fee = {
 };
 
 export type PackageFormField = {
+    package_id?: string;
     package_name: string;
     package_description: string;
     effective_start_date: string;
+    effective_end_date?: string | null;
     fees: Fees[];
     recurring: boolean;
     frequency: string;
+    package_status?: string;
 };
 
 export type UOM = {

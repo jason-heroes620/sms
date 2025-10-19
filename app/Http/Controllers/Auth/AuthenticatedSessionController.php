@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
         // Use session() helper function for better IDE support
         session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('dashboard.index', absolute: false));
     }
 
     /**

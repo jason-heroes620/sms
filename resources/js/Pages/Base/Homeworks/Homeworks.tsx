@@ -13,28 +13,25 @@ import { MoreHorizontal, Plus } from 'lucide-react';
 import moment from 'moment';
 
 type Homework = {
+    submission_id: string;
     homework_id: string;
-    homework_name: string;
-    homework_date: Date;
+    homework_description: string;
+    homework_date: string;
     class_name: string;
+    section_name: string;
     subject_name: string;
-    first_name: string;
+    submissions: string;
     last_name: string;
+    first_name: string;
 };
 
 export const columns: ColumnDef<Homework>[] = [
     {
-        accessorKey: 'homework_date',
-        header: 'Homework Date',
+        accessorKey: 'class_section',
+        header: 'Class - Section',
         cell: ({ row }) => {
-            return moment(row.getValue('homework_date')).format('DD MMM YYYY');
-        },
-    },
-    {
-        accessorKey: 'class_name',
-        header: 'Class',
-        cell: ({ row }) => {
-            return row.getValue('class_name') as string;
+            const homework = row.original;
+            return `${homework.class_name} - ${homework.section_name}`;
         },
     },
     {
@@ -45,12 +42,26 @@ export const columns: ColumnDef<Homework>[] = [
         },
     },
     {
+        accessorKey: 'homework_date',
+        header: 'Date',
+        cell: ({ row }) => {
+            return moment(row.getValue('homework_date') as string).format('LL');
+        },
+    },
+    {
         accessorKey: 'created_by',
         header: 'Created By',
         cell: ({ row }) => {
             const name = row.original;
 
             return `${name.last_name} ${name.first_name}`;
+        },
+    },
+    {
+        accessorKey: 'submissions',
+        header: 'Total Submissions',
+        cell: ({ row }) => {
+            return row.getValue('submissions') as string;
         },
     },
     {
@@ -74,6 +85,18 @@ export const columns: ColumnDef<Homework>[] = [
                                 )
                             }
                         >
+                            Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() =>
+                                router.visit(
+                                    route(
+                                        'submissions.index',
+                                        homework.homework_id,
+                                    ),
+                                )
+                            }
+                        >
                             View
                         </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -86,7 +109,7 @@ export const columns: ColumnDef<Homework>[] = [
 const Homeworks = () => {
     return (
         <AuthenticatedLayout>
-            <Head title="Exams" />
+            <Head title="Homeworks" />
             <div className="mx-auto">
                 <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
                     <div className="flex items-center justify-between p-4 text-gray-900 dark:text-gray-100">

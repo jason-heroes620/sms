@@ -34,6 +34,7 @@ return new class extends Migration
             $table->enum('user_status', ['active', 'inactive'])->default('active');
             $table->uuid('payroll_employee_id')->nullable();
             $table->uuid('position_id')->nullable();
+            $table->uuid('branch_id');
             $table->timestamps();
 
             // // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

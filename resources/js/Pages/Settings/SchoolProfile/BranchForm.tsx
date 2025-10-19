@@ -223,6 +223,7 @@ const BranchForm = ({
                         onChange={(e) => setData('branch_name', e.target.value)}
                         className="mt-1 block w-full rounded-md border-gray-300 px-2 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                         required
+                        autoFocus={false}
                     />
                     {errors.branch_name && (
                         <p className="mt-2 text-sm text-red-600">
@@ -230,7 +231,7 @@ const BranchForm = ({
                         </p>
                     )}
                 </div>
-                <div className="mb-2">
+                <div className="mb-4">
                     <label
                         htmlFor="branch_email"
                         className="block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -250,7 +251,7 @@ const BranchForm = ({
                         required
                     />
                 </div>
-                <div className="mb-2">
+                <div className="mb-4">
                     <label
                         htmlFor="branch_email"
                         className="block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -388,7 +389,7 @@ const BranchForm = ({
                         </Select>
                     </div>
                 </div>
-                <div className="flex justify-between py-4">
+                <div className="py flex justify-between">
                     <Dialog>
                         <DialogTrigger asChild>
                             <Button variant={'outline'} size={'sm'}>

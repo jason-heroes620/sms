@@ -214,7 +214,7 @@ const UserForm = ({
             <div className="col-span-2">
                 <Input
                     className="mt-1"
-                    value={data.address.address3}
+                    value={data.address.address3 || ''}
                     maxLength={100}
                     onChange={(e) =>
                         setData('address', {
@@ -656,9 +656,11 @@ const UserForm = ({
                                     );
                                     setEmploymentDateOpen(false);
                                 }}
-                                defaultMonth={moment(
-                                    data.employment_date,
-                                ).toDate()}
+                                defaultMonth={
+                                    data.employment_date
+                                        ? moment(data.employment_date).toDate()
+                                        : undefined
+                                }
                             />
                         </PopoverContent>
                     </Popover>

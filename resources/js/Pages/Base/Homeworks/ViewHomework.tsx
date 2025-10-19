@@ -22,6 +22,7 @@ const ViewHomework = ({
         homework_date: homework?.homework_date,
         subject_id: homework?.subject_id,
         class_id: homework?.class_id,
+        section_id: homework?.section_id,
         branch_id: branch.branch_id,
     });
 

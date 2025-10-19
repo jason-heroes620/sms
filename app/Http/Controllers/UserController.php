@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
-
+use Symfony\Component\Uid\UuidV4;
+use Symfony\Component\Uid\UuidV8;
 
 class UserController extends Controller
 {
@@ -39,7 +40,7 @@ class UserController extends Controller
 
     public function showAll(Request $request)
     {
-        $query = UserProfiles::select('user_id', DB::raw("concat(last_name, ' ', first_name) as name"));
+        $query = UserProfiles::select('user_id', DB::raw("concat(last_name, ' ', first_name) as name"), "user_profile_id");
 
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -165,6 +166,7 @@ class UserController extends Controller
                 'user_status' => $request->user_status,
                 'user_id' => $user->id,
                 'position_id' => $request->position_id,
+                'branch_id' => $request->branch_id,
                 'employment_date' => $request->employment_date,
             ]);
 
@@ -212,9 +214,163 @@ class UserController extends Controller
         }
     }
 
-    public function edit(Request $request) {}
+    public function edit($id)
+    {
+        $user = UserProfiles::find($id);
+        $roles = Roles::select('id', 'name')->orderBy('name')->get();
+        $positions = Positions::select('position_id', 'position')->orderBy('position')->get();
+        $branches = Branches::select('branch_id as value', 'branch_name as label')->where('branch_status', 'active')->orderBy('branch_name')->get();
+        $branch_user = BranchUser::select('branch_id', 'role_id')
+            ->where('user_id', $user->user_id)
+            ->get();
 
-    public function update(Request $request) {}
+        $grouped_data = [];
+
+        foreach ($branch_user as $item) {
+            $role_id = $item->role_id;
+            $branch_id = $item->branch_id;
+
+            // Check if the role_id already exists as a key in the new array
+            if (!isset($grouped_data[$role_id])) {
+                // If it doesn't exist, initialize it with the role_id and a new array for branch_ids
+                $grouped_data[$role_id] = [
+                    'role_id' => UuidV8::v4(),
+                    'id' => $role_id,
+                    'branch_id' => []
+                ];
+            }
+
+            // Add the branch_id to the array for the current role_id
+            $grouped_data[$role_id]['branch_id'][] = $branch_id;
+        }
+
+        // Convert the associative array (keyed by role_id) back to a numerically indexed array
+        $role_info = array_values($grouped_data);
+        $user['role_info'] = $role_info;
+
+        return Inertia::render('Settings/User/EditUser', compact('user', 'roles', 'positions', 'branches'));
+    }
+
+    public function update(Request $request)
+    {
+        $creator = Auth::id();
+        try {
+            $validator = Validator::make($request->all(), [
+                'first_name' => 'required|string|max:100',
+                'last_name' => 'required|string|max:100',
+                'email' => 'required|email|max:150',
+                'dob' => 'required|date',
+                'address.address1' => 'required|string|max:100',
+                'address.address2' => 'nullable|string|max:100',
+                'address.address3' => 'nullable|string|max:100',
+                'address.city' => 'nullable|string|max:100',
+                'address.postcode' => 'nullable|string|max:10',
+                'address.state' => 'nullable|string|max:50',
+                'address.country' => 'nullable|string|max:50',
+                'contact_no' => 'required|string|max:20',
+                'marital_status' => 'required|string',
+                'residential_status' => 'required|string',
+                'gender' => 'required|string',
+                'race' => 'required|string',
+                'role_info' => 'required|array',
+                'role_info.*.branch_id' => 'required|array',
+                'role_info.*.role_id' => 'required|string',
+                'role_info.*.id' => 'required',
+                'position_id' => 'required|string',
+                'branch_id' => 'required|string',
+                'employment_date' => 'required|date',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()
+                    ->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            DB::beginTransaction();
+
+            $userProfile = UserProfiles::where('user_profile_id', $request->id)->first();
+            $userProfile->update([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'dob' => $request->dob,
+                'contact_no' => $request->contact_no,
+                'address' => $request->address,
+                'gender' => $request->gender,
+                'race' => $request->race,
+                'residential_status' => $request->residential_status,
+                'marital_status' => $request->marital_status,
+                'nic' => $request->nic,
+                'passport' => $request->passport,
+                'email' => $request->email,
+                'user_status' => $request->user_status,
+                'position_id' => $request->position_id,
+                'branch_id' => $request->branch_id,
+                'employment_date' => $request->employment_date,
+            ]);
+            Log::info('user profile updated');
+            Log::info($userProfile->user_id);
+            $user = User::where('id', $userProfile->user_id)->first();
+            Log::info($user);
+            $user->update([
+                'name' => $request->last_name . ' ' . $request->first_name,
+                'user_status' => 'active',
+            ]);
+
+            $bu = [];
+            foreach ($request->role_info as $role) {
+                foreach ($role['branch_id'] as $branch) {
+                    //     BranchUser::create([
+                    //         'user_id' => $user->id,
+                    //         'branch_id' => $branch,
+                    //         'role_id' => $role['id'],
+                    //         'created_by' => $creator
+                    //     ]);
+                    // }
+                    $bu[] = [
+                        'user_id' => $user->id,
+                        'branch_id' => $branch,
+                        'role_id' => $role['id'],
+                        'created_by' => $creator
+                    ];
+                }
+                Log::info($bu);
+                $user->branches()->sync($bu);
+            }
+
+            // $response = $this->payrollService->createEmployee($this->convertPayrollEmployee(($request)));
+            // if ($response->getStatusCode() == 201 || $response->getStatusCode() == 200) {
+            //     Log::info('response successful');
+            //     $data = json_decode($response->getBody()->getContents(), true);
+            //     $userProfile->update([
+            //         'payroll_employee_id' => $data['id'], // Store the API's ID
+            //     ]);
+
+            //     $jibbleResponse = $this->jibbleService->createMember($this->convertJibbleMember($request, $data['id']));
+            //     if ($jibbleResponse->getStatusCode() == 201 || $response->getStatusCode() == 200) {
+            //         Log::info('response successful');
+
+            DB::commit();
+            return redirect()->back()->with('success', 'User created successfully.');
+            //     } else {
+            //         // Log the error for monitoring
+            //         DB::rollBack();
+            //         Log::warning("API failed for employee {$userProfile->payroll_position_id}. Status: {$response->status()}");
+            //         return redirect()->back()->with('error', 'Error creating user');
+            //     }
+            // } else {
+            //     // Log the error for monitoring
+            //     DB::rollBack();
+            //     Log::warning("API failed for employee {$userProfile->payroll_position_id}. Status: {$response->status()}");
+            //     return redirect()->back()->with('error', 'Error creating user');
+            // }
+        } catch (Exception $e) {
+            Log::error($e);
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
 
     public function getUserBranchIds($userId)
     {

@@ -3,8 +3,16 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { RoleInfo, UserFormField } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
 import { CircleChevronLeft } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
+import RoleForm from './RoleForm';
 import UserForm from './UserForm';
+
+type Role = {
+    id: string;
+    name: string;
+};
 
 const EditUser = ({
     user,
@@ -13,7 +21,7 @@ const EditUser = ({
     positions,
 }: {
     user: UserFormField;
-    roles: RoleInfo[];
+    roles: Role[];
     branches: [
         {
             label: string;
@@ -29,6 +37,34 @@ const EditUser = ({
 }) => {
     const { data, setData, processing, errors, put } =
         useForm<UserFormField>(user);
+
+    const [userRole, setUserRole] = useState<RoleInfo[]>(
+        user.role_info.length > 0
+            ? user.role_info.map((role: RoleInfo) => ({
+                  role_id: role.role_id,
+                  branch_id: role.branch_id,
+                  id: role.id,
+              }))
+            : [
+                  {
+                      role_id: uuidv4(),
+                      branch_id: [],
+                      id: '',
+                  },
+              ],
+    );
+
+    const handleChange = (
+        role_id: string,
+        field: keyof RoleInfo,
+        value: string | string[],
+    ) => {
+        const newUserRole = userRole.map((role: RoleInfo) =>
+            role.role_id === role_id ? { ...role, [field]: value } : role,
+        );
+        setData('role_info', newUserRole);
+        setUserRole(newUserRole);
+    };
 
     const handleUpdate = () => {
         put(route('user.update', user.user_profile_id), {
@@ -85,6 +121,15 @@ const EditUser = ({
                                 </div>
                                 <div className="py-4">
                                     <hr />
+                                </div>
+                                <div className="flex flex-col md:grid md:grid-cols-2">
+                                    <RoleForm
+                                        branches={branches}
+                                        roles={roles}
+                                        userRole={userRole}
+                                        setUserRole={setUserRole}
+                                        handleChange={handleChange}
+                                    />
                                 </div>
                                 <div className="flex justify-end py-2">
                                     <Button

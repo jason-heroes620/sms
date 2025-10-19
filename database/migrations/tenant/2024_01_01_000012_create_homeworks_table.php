@@ -16,16 +16,10 @@ return new class extends Migration
             $table->text('homework_description');
             $table->date('homework_date');
             $table->uuid('class_id');
+            $table->uuid('section_id');
             $table->uuid('subject_id');
             $table->uuid('created_by');
             $table->timestamps();
-
-            // $table->foreign('class_id')->references('class_id')->on('classes')->onDelete('cascade');
-            // $table->foreign('subject_id')->references('subject_id')->on('subjects')->onDelete('cascade');
-            // $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
-
-            // $table->index(['homework_date']);
-            // $table->index(['class_id', 'subject_id']);
         });
     }
 

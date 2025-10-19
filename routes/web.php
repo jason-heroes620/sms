@@ -16,6 +16,7 @@ use App\Http\Controllers\ExamController;
 use App\Http\Controllers\FeeController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\HomeworkController;
+use App\Http\Controllers\HomeworkSubmissionController;
 use App\Http\Controllers\IntegrationConfigurationController;
 use App\Http\Controllers\IntegrationController;
 use App\Http\Controllers\InvoiceController;
@@ -106,7 +107,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/homework/store', [HomeworkController::class, 'store'])->name('homework.store');
     Route::get('/homeworks/{id}', [HomeworkController::class, 'edit'])->name('homework.edit');
     Route::put('/homeworks/{id}', [HomeworkController::class, 'update'])->name('homework.update');
-    Route::get('/homework-submissions', [HomeworkController::class, 'submissions'])->name('homework.submissions');
+
+    Route::get('/homework-submissions/{id}', [HomeworkSubmissionController::class, 'index'])->name('submissions.index');
+    Route::get('/homework-submissions/showAll/{id}', [HomeworkSubmissionController::class, 'showAll'])->name('submissions.all');
 
     Route::get('/getSubjectsByClass/{class_id}', [ClassController::class, 'getSubjectsByClass'])->name('getSubjectsByClass');
 
@@ -174,14 +177,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/grades/showAll', [GradeController::class, 'showAll'])->name('grade.showAll');
     Route::post('/grade/store', [GradeController::class, 'store'])->name('grade.store');
     Route::get('/grade/{id}', [GradeController::class, 'edit'])->name('grade.edit');
-    Route::patch('/grade/{id}', [GradeController::class, 'update'])->name('grade.update');
+    Route::put('/grade/{id}', [GradeController::class, 'update'])->name('grade.update');
 
     // Academic Year
     Route::get('/academic_years', [AcademicYearController::class, 'index'])->name('academic-year');
     Route::get('/academic_years/create', [AcademicYearController::class, 'create'])->name('academic-year.create');
     Route::post('/academic_years/store', [AcademicYearController::class, 'store'])->name('academic-year.store');
     Route::get('/academic_years/{id}', [AcademicYearController::class, 'edit'])->name('academic-year.edit');
-    Route::patch('/academic_years/{id}', [AcademicYearController::class, 'update'])->name('academic-year.update');
+    Route::put('/academic_years/{id}', [AcademicYearController::class, 'update'])->name('academic-year.update');
     Route::put('/academic_years/current/{id}', [AcademicYearController::class, 'updateIsCurrent'])->name('academic-year.updateIsCurrent');
 
     // Fees 
@@ -198,7 +201,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/all_packages', [PackageController::class, 'showAll'])->name('packages.showAll');
     Route::get('/packages/create', [PackageController::class, 'create'])->name('package.create');
     Route::post('/packages/store', [PackageController::class, 'store'])->name('package.store');
-
+    Route::get('/packages/{id}', [PackageController::class, 'edit'])->name('package.edit');
+    Route::put('/packages/{id}', [PackageController::class, 'update'])->name('package.update');
 
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/showAll', [UserController::class, 'showAll'])->name('users.showAll');

@@ -18,6 +18,8 @@ const AddHomework = ({
         homework_description: '',
         homework_date: moment().format('YYYY-MM-DD'),
         class_id: '',
+        section_id: '',
+        branch_id: '',
         subject_id: '',
     });
 

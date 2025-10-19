@@ -15,6 +15,7 @@ class Homeworks extends Model
         'homework_description',
         'homework_date',
         'class_id',
+        'section_id',
         'subject_id',
         'created_by',
     ];

@@ -106,7 +106,11 @@ export const columns: ColumnDef<Package>[] = [
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                            onClick={() => console.log(packages.package_id)}
+                            onClick={() =>
+                                router.visit(
+                                    route('package.edit', packages.package_id),
+                                )
+                            }
                         >
                             Edit
                         </DropdownMenuItem>
