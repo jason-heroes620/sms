@@ -16,7 +16,9 @@ class Exams extends Model
         'exam_description',
         'start_date',
         'end_date',
-        'created_by'
+        'created_by',
+        'class_id',
+        'subject_id'
     ];
 
     public $timestamps = true;

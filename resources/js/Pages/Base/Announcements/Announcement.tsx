@@ -50,7 +50,7 @@ const Announcement = ({
     const [branch, setBranch] = useState(
         branches.length === 1 ? branches[0].branch_id : (filters ?? ''),
     );
-    console.log(filters);
+
     return (
         <AuthenticatedLayout>
             <Head title="View Class" />
@@ -215,15 +215,21 @@ const Announcement = ({
                                                 />
                                             )}
                                             <div className="px-4 py-2">
-                                                <h2 className="mt-2 text-lg font-semibold">
+                                                <div className="flex justify-between">
+                                                    <p className="text-sm text-gray-500 italic">
+                                                        {moment(
+                                                            a.created_at,
+                                                        ).format('DD MMM YYYY')}
+                                                    </p>
+                                                    <p className="text-sm font-bold text-gray-500">
+                                                        {a.announcement_status.toUpperCase()}
+                                                    </p>
+                                                </div>
+                                                <h2 className="text-md mt-2 line-clamp-2 font-semibold">
                                                     {a.title}{' '}
                                                 </h2>
-                                                <p className="text-sm text-gray-500 italic">
-                                                    {moment(
-                                                        a.created_at,
-                                                    ).format('DD MMM YYYY')}
-                                                </p>
-                                                <p className="mt-1 text-sm">
+
+                                                <p className="mt-2 line-clamp-2 text-sm">
                                                     {a.short_description}
                                                 </p>
                                                 <div className="flex justify-end py-4">

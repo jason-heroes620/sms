@@ -16,6 +16,10 @@ type Exam = {
     exam_id: string;
     exam_name: string;
     exam_description: string;
+    class_name: string;
+    subject_name: string;
+    start_date: string;
+    end_date: string;
 };
 
 export const columns: ColumnDef<Exam>[] = [
@@ -26,11 +30,25 @@ export const columns: ColumnDef<Exam>[] = [
             return row.getValue('exam_name') as string;
         },
     },
+    // {
+    //     accessorKey: 'exam_description',
+    //     header: 'Exam Description',
+    //     cell: ({ row }) => {
+    //         return row.getValue('exam_description') as string;
+    //     },
+    // },
     {
-        accessorKey: 'exam_description',
-        header: 'Exam Description',
+        accessorKey: 'class_name',
+        header: 'Class',
         cell: ({ row }) => {
-            return row.getValue('exam_description') as string;
+            return row.getValue('class_name') as string;
+        },
+    },
+    {
+        accessorKey: 'subject_name',
+        header: 'Subject',
+        cell: ({ row }) => {
+            return row.getValue('subject_name') as string;
         },
     },
     {
@@ -63,9 +81,20 @@ export const columns: ColumnDef<Exam>[] = [
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                            onClick={() => console.log(exam.exam_id)}
+                            onClick={() =>
+                                router.visit(route('exam.edit', exam.exam_id))
+                            }
                         >
-                            Edit
+                            View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() =>
+                                router.visit(
+                                    route('exam.results', exam.exam_id),
+                                )
+                            }
+                        >
+                            Results
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

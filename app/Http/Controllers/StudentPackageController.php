@@ -16,8 +16,6 @@ class StudentPackageController extends Controller
         $packages = Packages::select('package_id', 'package_name', 'package_price', 'frequency')
             ->where('package_status', 'active')->get();
 
-
-
         return response()->json(compact('packages'));
     }
 

@@ -13,6 +13,7 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\ClassController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\ExamResultsController;
 use App\Http\Controllers\FeeController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\HomeworkController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SchoolProfileController;
 use App\Http\Controllers\SectionController;
@@ -73,6 +75,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/student/{id}', [StudentController::class, 'update'])->name('student.update');
 
     Route::get('/student/attendance', [StudentController::class, 'attendance'])->name('student.attendance');
+    Route::get('/student/student_attendance', [StudentController::class, 'getStudentAttendance'])->name('student.attendanceByDay');
 
     Route::get('/getStudentByClass/{id}', [StudentController::class, 'getStudentByClass'])->name('student.getStudentByClass');
 
@@ -114,17 +117,24 @@ Route::middleware('auth')->group(function () {
     Route::get('/homeworks/{id}', [HomeworkController::class, 'edit'])->name('homework.edit');
     Route::put('/homeworks/{id}', [HomeworkController::class, 'update'])->name('homework.update');
 
-    Route::get('/homework-submissions/{id}', [HomeworkSubmissionController::class, 'index'])->name('submissions.index');
+    Route::get('/homeworks/submissions/{id}', [HomeworkSubmissionController::class, 'index'])->name('submissions.index');
     Route::get('/homework-submissions/showAll/{id}', [HomeworkSubmissionController::class, 'showAll'])->name('submissions.all');
+    Route::put('/homework-submissions/update/{id}', [HomeworkSubmissionController::class, 'update'])->name('submissions.update');
+    Route::get('/homework-submissions/show/{id}', [HomeworkSubmissionController::class, 'show'])->name('submissions.show');
 
     Route::get('/getSubjectsByClass/{class_id}', [ClassController::class, 'getSubjectsByClass'])->name('getSubjectsByClass');
 
     // Exam Routes
     Route::get('/exams', [ExamController::class, 'index'])->name('exams.index');
     Route::get('/all_exams', [ExamController::class, 'showAll'])->name('exams.all');
-    Route::get('/exam/create', [ExamController::class, 'create'])->name('exam.create');
-    Route::post('/exam/store', [ExamController::class, 'store'])->name('exam.store');
-    Route::get('/exam/{id}', [ExamController::class, 'edit'])->name('exam.edit');
+    Route::get('/exams/create', [ExamController::class, 'create'])->name('exam.create');
+    Route::post('/exams/store', [ExamController::class, 'store'])->name('exam.store');
+    Route::get('/exams/{id}', [ExamController::class, 'edit'])->name('exam.edit');
+    Route::put('/exams/{id}', [ExamController::class, 'update'])->name('exam.update');
+    Route::get('/exams/results/{id}', [ExamController::class, 'examResults'])->name('exam.results');
+
+    Route::get('/exam_results/{id}', [ExamResultsController::class, 'getStudentListByClass'])->name('exam_results.by_class');
+    Route::put('/exam_results/update/{id}', [ExamResultsController::class, 'updateStudentResult'])->name('exam_results.update');
 
     // Timetables Routes
     Route::get('/timetable', [TimetableController::class, 'view'])->name('timetable.view');
@@ -136,15 +146,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/all_assessments', [AssessmentController::class, 'showAll'])->name('assessments.all');
     Route::get('/assessment/create', [AssessmentController::class, 'create'])->name('assessment.create');
     Route::post('/assessment/store', [AssessmentController::class, 'store'])->name('assessment.store');
-    Route::get('/assessment/{id}', [AssessmentController::class, 'edit'])->name('assessment.edit');
+    Route::get('/assessments/{id}', [AssessmentController::class, 'edit'])->name('assessment.edit');
+    Route::put('/assessment/{id}', [AssessmentController::class, 'update'])->name('assessment.update');
     Route::post('/assessment_generate', [AssessmentController::class, 'generateQuery'])->name('assessment.generate');
+
+    // Reports
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
     // Announcements
     Route::get('/announcements/{id?}', [AnnouncementController::class, 'index'])->name('announcements.index');
     Route::get('/announcement/create', [AnnouncementController::class, 'create'])->name('announcement.create');
     Route::post('/announcements/store', [AnnouncementController::class, 'store'])->name('announcement.store');
     Route::get('/announcements/show/{id}', [AnnouncementController::class, 'show'])->name('announcement.show');
-
+    Route::get('/announcements/edit/{id}', [AnnouncementController::class, 'edit'])->name('announcement.edit');
+    Route::post('/announcements/update/{id}', [AnnouncementController::class, 'update'])->name('announcement.update');
+    Route::put('/announcements/publish/{id}', [AnnouncementController::class, 'publish'])->name('announcement.publish');
+    Route::put('/announcements/archive/{id}', [AnnouncementController::class, 'archive'])->name('announcement.archive');
 
     // Billing
 
@@ -233,6 +250,10 @@ Route::middleware('auth')->group(function () {
 
     Route::post('integrations/{config}/store', [IntegrationController::class, 'store'])->name('integrations.store');
     Route::put('integrations/{config}/update', [IntegrationController::class, 'update'])->name('integrations.update');
+
+    Route::get('integrations_payroll_items', [IntegrationController::class, 'payrollItems'])->name('integrations.payrollItems');
+    Route::post('integrations_payroll_items/store', [IntegrationController::class, 'storePayrollItem'])->name('integrations.payrollItems.store');
+    Route::put('integrations_payroll_items/update/{id}', [IntegrationController::class, 'updatePayrollItem'])->name('integrations.payrollItems.update');
 });
 
 require __DIR__ . '/auth.php'; // Breeze default routes (uses 'web' guard)

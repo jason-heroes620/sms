@@ -21,6 +21,7 @@ class TimetableDetails extends Model
         'start_time',
         'end_time',
         'color',
-        'created_by'
+        'created_by',
+        'timetable_detail_status'
     ];
 }

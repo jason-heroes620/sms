@@ -12,34 +12,31 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import axios from 'axios';
-import { CircleChevronLeft } from 'lucide-react';
 import moment from 'moment';
 import { FormEvent } from 'react';
 import { toast } from 'sonner';
 
-type Homework = {
-    homework_id: string;
-    homework_date: string;
+type Students = {
+    student_id: string;
+    student_name: string;
     class_name: string;
     section_name: string;
-    subject_name: string;
+    marks: number;
+    grade: string;
+    comments: string;
 };
 
-type Submission = {
-    homework_submission_id: string;
-    homework_id: string;
-    last_name: string;
-    first_name: string;
-    created_at: string;
-    submissions: {
-        homework_submission_id: string;
-        comments: string;
-        marks: number;
+export function PopoverDemo({ student_id, marks, comments }: any) {
+    const parseIdFromPath = (path: any) => {
+        const parts = path.split('/');
+        return parts[parts.length - 1];
     };
-};
 
-export function PopoverDemo({ submission_id, marks, comments }: any) {
+    // In your Vue/React component:
+    const pageId = parseIdFromPath(window.location.pathname);
+
     const { data, setData, put, processing, errors } = useForm({
+        exam_id: pageId,
         marks: marks,
         comments: comments,
     });
@@ -47,7 +44,7 @@ export function PopoverDemo({ submission_id, marks, comments }: any) {
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         axios
-            .put(route('submissions.update', submission_id), data)
+            .put(route('exam_results.update', student_id), data)
             .then((response) => {
                 if (response.status === 200) {
                     toast.success('Comments updated.');
@@ -113,157 +110,164 @@ export function PopoverDemo({ submission_id, marks, comments }: any) {
     );
 }
 
-export const columns: ColumnDef<Submission>[] = [
+const columns: ColumnDef<Students>[] = [
     {
-        accessorKey: 'student',
-        header: 'Student',
+        accessorKey: 'student_name',
+        header: 'Student Name',
         cell: ({ row }) => {
-            const homework = row.original;
-            return `${homework.last_name} ${homework.first_name}`;
+            return row.getValue('student_name') as string;
         },
     },
     {
-        accessorKey: 'created_at',
-        header: 'Submission Date',
+        accessorKey: 'class_name',
+        header: 'Class',
         cell: ({ row }) => {
-            return moment(row.getValue('created_at') as string).format('LL');
-        },
-    },
-    {
-        accessorKey: 'comments',
-        header: 'Comments',
-        cell: ({ row }) => {
-            const homework = row.original;
-            if (homework.submissions !== null)
-                return homework.submissions.comments;
+            return row.getValue('class_name') as string;
         },
     },
     {
         accessorKey: 'marks',
         header: 'Marks',
         cell: ({ row }) => {
-            const homework = row.original;
-            if (homework.submissions !== null)
-                return homework.submissions.marks;
+            return row.getValue('marks') as number;
+        },
+    },
+    {
+        accessorKey: 'grade',
+        header: 'Grade',
+        cell: ({ row }) => {
+            return row.getValue('grade') as string;
+        },
+    },
+    {
+        accessorKey: 'comments',
+        header: 'Comments',
+        cell: ({ row }) => {
+            return row.getValue('comments') as string;
         },
     },
     {
         id: 'actions',
         cell: ({ row }) => {
-            const homework = row.original;
+            const results = row.original;
+
             return (
                 <div>
-                    {homework.submissions !== null ? (
-                        <div className="flex flex-row gap-2">
-                            <a
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                href={route(
-                                    'submissions.show',
-                                    homework.submissions.homework_submission_id,
-                                )}
-                            >
-                                <Button variant={'primary'} size={'sm'}>
-                                    View
-                                </Button>
-                            </a>
-                            <PopoverDemo
-                                submission_id={
-                                    homework.submissions?.homework_submission_id
-                                }
-                                marks={homework.submissions?.marks}
-                                comments={homework.submissions?.comments}
-                            />
-                        </div>
-                    ) : (
-                        ''
-                    )}
+                    <PopoverDemo
+                        student_id={results.student_id}
+                        marks={results.marks}
+                        comments={results.comments}
+                    />
                 </div>
             );
         },
     },
 ];
 
-const Submissions = ({ homework }: { homework: Homework }) => {
+const ExamResults = ({ exam }: { exam: any }) => {
     return (
         <AuthenticatedLayout>
-            <Head title="Submissions" />
+            <Head title="ExamResults" />
             <div className="mx-auto">
                 <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
-                    <div className="flex flex-row gap-4 p-4">
-                        <CircleChevronLeft
-                            color={'#F06F40'}
-                            className="cursor-pointer"
-                            onClick={() =>
-                                router.visit(route('homework.index'))
-                            }
-                        />
+                    <div className="flex items-center justify-between p-4 text-gray-900 dark:text-gray-100">
                         <div>
-                            <span className="font-bold">Homework </span>
-                            <span>| Submissions </span>
+                            <span className="font-bold">Exam Results </span>
+                            <span> | {exam.exam_name}</span>
+                        </div>
+                        <div className="flex justify-end">
+                            {/* <Button
+                                variant={'primary'}
+                                size={'sm'}
+                                onClick={() =>
+                                    router.visit(route('exam_result.create'))
+                                }
+                            >
+                                <Plus />
+                                Create
+                            </Button> */}
                         </div>
                     </div>
                 </div>
-                <div className="py-8">
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
-                        <div className="p-4 text-gray-900 dark:text-gray-100">
-                            <div className="py-4">
-                                <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="py-4">
+                    <div className="mb-4 overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
+                        <div className="p-4">
+                            <div className="grid grid-cols-1 text-gray-900 md:grid-cols-3 md:gap-4 dark:text-gray-100">
+                                <div className="py-2">
                                     <div>
                                         <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            Homework Date
+                                            Branch
                                         </Label>
                                         <Input
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            value={moment(
-                                                homework.homework_date,
-                                            ).format('DD MMM YYYY')}
+                                            defaultValue={exam.branch_name}
                                             disabled
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                                         />
                                     </div>
                                 </div>
-                                <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+                                <div className="py-2">
                                     <div>
                                         <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                             Class
                                         </Label>
                                         <Input
-                                            value={homework.class_name}
+                                            defaultValue={exam.class_name}
                                             disabled
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                        ></Input>
-                                    </div>
-                                    <div>
-                                        <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            Section
-                                        </Label>
-                                        <Input
-                                            value={homework.section_name}
-                                            disabled
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                        ></Input>
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                        />
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                <div className="py-2">
                                     <div>
                                         <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                             Subject
                                         </Label>
                                         <Input
-                                            value={homework.subject_name}
+                                            defaultValue={exam.subject_name}
                                             disabled
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                        ></Input>
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                        />
                                     </div>
                                 </div>
                             </div>
-                            <div>
-                                <hr />
+                            <div className="grid grid-cols-1 text-gray-900 md:grid-cols-3 md:gap-4 dark:text-gray-100">
+                                <div className="py-2">
+                                    <div>
+                                        <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Start Date
+                                        </Label>
+                                        <Input
+                                            defaultValue={moment(
+                                                exam.start_date,
+                                            ).format('DD MMM YYYY')}
+                                            disabled
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="py-2">
+                                    <div>
+                                        <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            End Date
+                                        </Label>
+                                        <Input
+                                            defaultValue={moment(
+                                                exam.end_date,
+                                            ).format('DD MMM YYYY')}
+                                            disabled
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="py-4">
+                        </div>
+                    </div>
+                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
+                        <div className="p-4 text-gray-900 dark:text-gray-100">
+                            <div className="py-2">
                                 <DataTable
                                     columns={columns}
-                                    endpoint={`/homework-submissions/showAll/${homework.homework_id}`}
+                                    endpoint={`/exam_results/${exam.exam_id}`}
                                     options={{
                                         showSearch: true,
                                         showFilters: true,
@@ -280,4 +284,4 @@ const Submissions = ({ homework }: { homework: Homework }) => {
     );
 };
 
-export default Submissions;
+export default ExamResults;

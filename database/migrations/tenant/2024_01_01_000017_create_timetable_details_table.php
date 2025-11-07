@@ -23,6 +23,7 @@ return new class extends Migration
             $table->time('end_time');
             $table->string('color')->default('#3498db');
             $table->uuid('created_by');
+            $table->enum('timetable_detail_status', ['active', 'inactive'])->default('active');
             $table->timestamps();
 
             // $table->foreign('timetable_id')->references('timetable_id')->on('timetables')->onDelete('cascade');

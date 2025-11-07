@@ -1,38 +1,45 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { BranchType, Classes } from '@/types';
 import { Head, router } from '@inertiajs/react';
-
 import { CircleChevronLeft } from 'lucide-react';
-import ExamForm from './ExamForm';
+import AnnouncementForm from './AnnouncementForm';
 
-const AddExam = ({
-    branches,
+const EditAnnouncement = ({
     classes,
+    branches,
+    announcement,
 }: {
-    branches: BranchType[];
     classes: Classes[];
+    branches: BranchType[];
+    announcement: any;
 }) => {
     return (
         <AuthenticatedLayout>
-            <Head title="Add Exam" />
+            <Head title="Add Announcement" />
             <div className="mx-auto">
                 <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
                     <div className="flex flex-row gap-4 p-4">
                         <CircleChevronLeft
                             color={'#F06F40'}
                             className="cursor-pointer"
-                            onClick={() => router.visit(route('exam.index'))}
+                            onClick={() =>
+                                router.visit(route('announcements.index'))
+                            }
                         />
                         <div>
-                            <span className="font-bold">Exam</span>
-                            <span> | Add Exam</span>
+                            <span className="font-bold">Announcements</span>
+                            <span> | Edit Announcement</span>
                         </div>
                     </div>
                 </div>
                 <div className="py-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
                         <div className="p-4">
-                            <ExamForm branches={branches} classes={classes} />
+                            <AnnouncementForm
+                                branches={branches}
+                                classes={classes}
+                                announcement={announcement}
+                            />
                         </div>
                     </div>
                 </div>
@@ -41,4 +48,4 @@ const AddExam = ({
     );
 };
 
-export default AddExam;
+export default EditAnnouncement;

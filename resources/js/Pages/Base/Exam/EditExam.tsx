@@ -5,12 +5,14 @@ import { Head, router } from '@inertiajs/react';
 import { CircleChevronLeft } from 'lucide-react';
 import ExamForm from './ExamForm';
 
-const AddExam = ({
+const EditExam = ({
     branches,
     classes,
+    exam,
 }: {
     branches: BranchType[];
     classes: Classes[];
+    exam: any;
 }) => {
     return (
         <AuthenticatedLayout>
@@ -25,14 +27,18 @@ const AddExam = ({
                         />
                         <div>
                             <span className="font-bold">Exam</span>
-                            <span> | Add Exam</span>
+                            <span> | View Exam</span>
                         </div>
                     </div>
                 </div>
                 <div className="py-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
                         <div className="p-4">
-                            <ExamForm branches={branches} classes={classes} />
+                            <ExamForm
+                                branches={branches}
+                                classes={classes}
+                                exam={exam}
+                            />
                         </div>
                     </div>
                 </div>
@@ -41,4 +47,4 @@ const AddExam = ({
     );
 };
 
-export default AddExam;
+export default EditExam;

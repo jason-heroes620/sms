@@ -12,7 +12,7 @@ class Assessments extends Model
     protected $table = 'assessments';
     protected $primaryKey = 'assessment_id';
     protected $fillable = [
-        'student_id',
+        'class_student_id',
         'assessment_date',
         'comments',
         'assessment_status',

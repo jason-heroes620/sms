@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tag_groups', function (Blueprint $table) {
-            $table->uuid('tag_group_id')->primary();
+            $table->integer('tag_group_id')->primary()->autoIncrement();
             $table->string('tag_group', 100);
-            $table->string('tag_color', 8);
+            $table->string('tag_color', 8)->nullable();
             $table->string('tag_group_status', ['active', 'inactive'])->default('active');
             $table->enum('by_admin', ['Y', 'N'])->default('N');
             $table->uuid('created_by')->nullable();

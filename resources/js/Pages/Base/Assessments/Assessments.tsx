@@ -1,9 +1,15 @@
 import { DataTable } from '@/components/Datatables/data-table';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Plus } from 'lucide-react';
+import { MoreHorizontal, Plus } from 'lucide-react';
 import moment from 'moment';
 
 type Assessment = {
@@ -22,14 +28,15 @@ export const columns: ColumnDef<Assessment>[] = [
         header: 'Student Name',
         cell: ({ row }) => {
             const name = row.original;
-            return name.student_last_name + ' ' + name.student_last_name;
+            return name.student_last_name + ' ' + name.student_first_name;
         },
     },
     {
         accessorKey: 'comments',
         header: 'Comments',
         cell: ({ row }) => {
-            return row.getValue('comments') as string;
+            const comment = row.original;
+            return <p className="max-w-[150px] truncate">{comment.comments}</p>;
         },
     },
     {
@@ -46,6 +53,33 @@ export const columns: ColumnDef<Assessment>[] = [
         header: 'Date',
         cell: ({ row }) => {
             return moment(row.getValue('created_at')).format('DD MMM YYYY');
+        },
+    },
+    {
+        accessorKey: 'action',
+        header: 'Action',
+        cell: ({ row }) => {
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger>
+                        <MoreHorizontal />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                            onClick={() =>
+                                router.visit(
+                                    route(
+                                        'assessment.edit',
+                                        row.original.assessment_id,
+                                    ),
+                                )
+                            }
+                        >
+                            View
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            );
         },
     },
 ];

@@ -26,4 +26,16 @@ class BranchClass extends Model
             })->whereIn('branches.branch_id', BranchUser::getUserBranchIds($user))
             ->get();
     }
+
+    public static function getCustomClassesByBranchIdsFilter($user)
+    {
+        return self::select('classes.class_id', 'class_name', 'branches.branch_id', 'branch_name', 'classes.class_id as id', 'classes.class_name as value')
+            ->leftJoin('branches', 'branches.branch_id', 'branch_class.branch_id')
+            ->leftJoin('classes', 'branch_class.class_id', 'classes.class_id')
+            ->leftJoin('academic_years', function ($query) {
+                $query->where('is_current', 'true');
+                $query->where('classes.academic_year_id', 'academic_year.academic_year_id');
+            })->whereIn('branches.branch_id', BranchUser::getUserBranchIds($user))
+            ->get();
+    }
 }

@@ -72,13 +72,13 @@ const AddAssessment = ({
         post(route('assessment.store'), {
             onSuccess: () => {
                 toast.success('Assessment Added.');
+                router.visit(route('assessments.index'));
             },
             onError: () => {
                 toast.error('There was an error adding assessment.');
             },
         });
     };
-    console.log('data =>', data);
 
     const handleGenerateSentence = async (e: FormEvent) => {
         e.preventDefault();
@@ -172,7 +172,11 @@ const AddAssessment = ({
                                         </label>
                                         <div className="mt-1">
                                             <SearchSelect
-                                                endpoint={`/getStudentByClass/${data.class_id}`}
+                                                endpoint={
+                                                    data.class_id
+                                                        ? `/getStudentByClass/${data.class_id}`
+                                                        : ''
+                                                }
                                                 placeholder="Search Student"
                                                 onSelect={handleStudentSelect}
                                             />
@@ -184,18 +188,29 @@ const AddAssessment = ({
                                     <div className="mt-2 flex flex-row gap-4 py-2">
                                         {tag_groups?.map((t: TagGroup) => (
                                             <div key={t.tag_group_id}>
-                                                <Button
+                                                <button
                                                     type="button"
-                                                    variant={'outline'}
                                                     onClick={() =>
                                                         handleTagGroupChange(
                                                             t.tag_group_id,
                                                         )
                                                     }
-                                                    className={`cursor-pointer rounded-xl border border-green-800 px-4 py-2 font-extrabold shadow-md ${data.tag_group_id === t.tag_group_id ? `bg-green-800 text-white opacity-80` : `bg-white text-green-800`}`}
+                                                    className={`cursor-pointer rounded-xl border px-4 py-2 font-extrabold shadow-md`}
+                                                    style={{
+                                                        backgroundColor:
+                                                            data.tag_group_id ===
+                                                            t.tag_group_id
+                                                                ? t.tag_color
+                                                                : 'white',
+                                                        color:
+                                                            data.tag_group_id ===
+                                                            t.tag_group_id
+                                                                ? 'white'
+                                                                : t.tag_color,
+                                                    }}
                                                 >
                                                     {toCamelCase(t.tag_group)}
-                                                </Button>
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
@@ -275,10 +290,18 @@ const AddAssessment = ({
                                 <div>
                                     <Button
                                         type={'button'}
+                                        variant={'primary'}
                                         onClick={(e) =>
                                             handleGenerateSentence(e)
                                         }
-                                        disabled={loading ? true : false}
+                                        disabled={
+                                            loading ||
+                                            data.class_id == '' ||
+                                            data.student_id == '' ||
+                                            data.tags.length == 0
+                                                ? true
+                                                : false
+                                        }
                                     >
                                         {loading ? (
                                             <>

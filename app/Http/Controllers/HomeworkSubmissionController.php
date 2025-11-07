@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Tenant\ClassStudent;
 use App\Models\Tenant\Homeworks;
+use App\Models\Tenant\HomeworkSubmissionList as TenantHomeworkSubmissionList;
 use App\Models\Tenant\HomeworkSubmissions;
+use App\Models\Tenant\Students;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class HomeworkSubmissionController extends Controller
@@ -25,9 +29,13 @@ class HomeworkSubmissionController extends Controller
 
     public function showAll(Request $request)
     {
-        $query = HomeworkSubmissions::select('last_name', 'first_name', 'comments', 'marks')
-            ->leftJoin('students', 'students.student_id', 'homework_submissions.student_id')
-            ->where('homework_submissions.homework_id', $request->id);
+        $class = Homeworks::select('class_id', 'section_id')
+            ->where('homework_id', $request->id)
+            ->first();
+        $query = ClassStudent::select('last_name', 'first_name', 'students.student_id')
+            ->leftJoin('students', 'class_student.student_id', 'students.student_id')
+            ->where('class_id', $class->class_id)
+            ->where('section_id', $class->section_id);
 
         if ($request->has('filters')) {
             foreach ($request->filters as $column => $value) {
@@ -38,13 +46,21 @@ class HomeworkSubmissionController extends Controller
         }
         if ($request->has('sort')) {
             $query->orderBy($request->sort['field'], $request->sort['direction']);
-        } else {
-            $query->orderBy('homework_submissions.created_at', 'desc');
         }
+        // else {
+        //     $query->orderBy('homework_submissions.created_at', 'desc');
+        // }
 
         $perPage = $request->per_page ?? 10;
         $homeworks = $query->paginate($perPage);
-        Log::info($homeworks);
+
+        foreach ($homeworks as $homework) {
+            $homework->submissions = HomeworkSubmissions::select('marks', 'comments', 'homework_submission_id', 'created_at')
+                ->where('homework_id', $request->id)
+                ->where('student_id', $homework->student_id)
+                ->first();
+        }
+
         return response()->json([
             'data' => $homeworks->items(),
             'meta' => [
@@ -55,6 +71,34 @@ class HomeworkSubmissionController extends Controller
                 'from' => $homeworks->firstItem(),
                 'to' => $homeworks->lastItem(),
             ],
+        ]);
+    }
+
+    public function update(Request $request)
+    {
+        try {
+            $submission = HomeworkSubmissions::find($request->id);
+            $submission->update([
+                'marks' => $request->marks,
+                'comments' => $request->comments,
+            ]);
+        } catch (Exception $e) {
+            Log::error('Submission comment update error.' . $e);
+        }
+    }
+
+    public function show(Request $request)
+    {
+        $filename = TenantHomeworkSubmissionList::select('file_path')->where('homework_submission_id', $request->id)->first()->file_path;
+        if (!Storage::disk('public')->exists($filename)) {
+            abort(404);
+        }
+
+        $path = Storage::disk('public')->path($filename);
+
+        return response()->file($path, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
         ]);
     }
 }

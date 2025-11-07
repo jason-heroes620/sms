@@ -45,7 +45,9 @@ export const columns: ColumnDef<Homework>[] = [
         accessorKey: 'homework_date',
         header: 'Date',
         cell: ({ row }) => {
-            return moment(row.getValue('homework_date') as string).format('LL');
+            return moment(row.getValue('homework_date') as string).format(
+                'DD MMM YYYY',
+            );
         },
     },
     {

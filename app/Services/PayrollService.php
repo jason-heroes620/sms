@@ -184,6 +184,32 @@ class PayrollService
 
     // End Positions
 
+    // Payroll Items
+
+    public function getPayrollItems()
+    {
+        $client = new Client();
+        try {
+            $response = $client->request('GET', $this->api_link . '/PayrollItems?Archived=false&includedDisabled=false', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->token,
+                    'Content-Type' => 'application/json'
+                ],
+            ]);
+            $data = json_decode($response->getBody()->getContents(), true);
+            return $data;
+        } catch (Exception $e) {
+            if ($e->getCode() === 401) {
+                // Token has expired, handle token expiration
+                $newToken = $this->handleTokenExpiration($client, 'getPayrollItems', $this->token);
+                return $newToken;
+            } else {
+                // Handle other exceptions
+                throw $e;
+            }
+        }
+    }
+
     private function handleTokenExpiration(Client $client, string $originalFunction, string $oldToken, $data = null)
     {
         // Make a request to the token endpoint to get a new token.

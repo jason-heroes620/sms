@@ -15,13 +15,14 @@ class StudentAttendanceController extends Controller
 
         StudentAttendance::updateOrCreate(
             [
-                'student_id' => $request->input('student_id')
+                'student_id' => $request->input('student_id'),
+                'attendance_date' => Carbon::today(),
             ],
             [
-                'attendance' => $request->input('attendance'),
-                'created_by' => $user,
-                'created_at' => Carbon::today(),
-                'update_at' => Carbon::today()
+                'class_id' => $request->input('class_id'),
+                'recorded_by' => $user,
+                'remarks' => $request->input('remarks'),
+                'status' => $request->input('attendance'),
             ]
         );
     }

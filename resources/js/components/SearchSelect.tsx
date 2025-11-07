@@ -29,10 +29,10 @@ export default function SearchSelect({
     // Fetch options from API when query changes
     useEffect(() => {
         const fetchOptions = async () => {
-            if (query.length < 2) {
-                setOptions([]);
-                return;
-            }
+            // if (query.length < 2) {
+            //     setOptions([]);
+            //     return;
+            // }
 
             setLoading(true);
             try {

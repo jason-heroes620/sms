@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('assessments', function (Blueprint $table) {
             $table->uuid('assessment_id')->primary();
-            $table->uuid('student_id');
+            $table->uuid('class_student_id');
             $table->text('comments');
             $table->date('assessment_date');
             $table->enum('assessment_status', ['scheduled', 'completed', 'cancelled'])->default('completed');

@@ -6,6 +6,7 @@ import Bukku from './Bukku';
 import Configurations from './Configurations';
 import Jibble from './Jibble';
 import Payroll from './Payroll';
+import PayrollItems from './payrollItems';
 
 type IntegrationKeys = {
     payroll: {
@@ -86,6 +87,9 @@ const Integrations = ({
                                     <TabsTrigger value="configurations">
                                         Configurations
                                     </TabsTrigger>
+                                    <TabsTrigger value="payrollItems">
+                                        Payroll Items
+                                    </TabsTrigger>
                                 </TabsList>
                                 <TabsContent
                                     value="account"
@@ -104,6 +108,9 @@ const Integrations = ({
                                             account_receivables
                                         }
                                     />
+                                </TabsContent>
+                                <TabsContent value="payrollItems">
+                                    <PayrollItems />
                                 </TabsContent>
                             </Tabs>
                         </div>

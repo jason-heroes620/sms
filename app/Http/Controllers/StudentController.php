@@ -28,6 +28,7 @@ class StudentController extends Controller
     {
         $this->relationships = $relationships;
     }
+
     public function index(Request $request)
     {
         $classes = Classes::select('class_id as id', 'class_name as value')->withActiveAcademicYears()->get()->toArray();
@@ -37,10 +38,11 @@ class StudentController extends Controller
 
     public function showAll(Request $request)
     {
-        $query = Students::select(['students.student_id', 'last_name', 'first_name', 'registration_no', 'gender', 'class_name', 'section_name'])
+        $query = Students::select(['students.student_id', DB::raw("concat(last_name, ' ', first_name) as student_name"), 'last_name', 'first_name', 'gender', 'class_name', 'section_name', 'classes.class_id', 'student_attendance.status'])
             ->leftJoin('class_student', 'students.student_id', 'class_student.student_id')
             ->leftJoin('classes', 'class_student.class_id', 'classes.class_id')
-            ->leftJoin('sections', 'sections.section_id', 'class_student.section_id');
+            ->leftJoin('sections', 'sections.section_id', 'class_student.section_id')
+            ->leftJoin('student_attendance', 'students.student_id', 'student_attendance.student_id');
 
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -337,22 +339,81 @@ class StudentController extends Controller
 
     public function attendance()
     {
-        // Assuming you have a way to get the current academic year ID, e.g., from a helper or config
-        $classes = Classes::select('class_id as id', 'class_name as value')->withActiveAcademicYears()->get()->toArray();
+        $user = Auth::id();
+        $classes = BranchClass::getCustomClassesByBranchIdsFilter($user)->toArray();
         array_unshift($classes, ['id' => ' ', 'value' => 'All Classes']);
 
         return Inertia::render('Base/Student/Attendance', compact('classes'));
     }
 
+    public function getStudentAttendance(Request $request)
+    {
+        $query = Students::select(['students.student_id', DB::raw("concat(last_name, ' ', first_name) as student_name"), 'last_name', 'first_name', 'gender', 'class_name', 'section_name', 'classes.class_id', 'student_attendance.status', 'check_in_time', 'check_out_time'])
+            ->leftJoin('class_student', 'students.student_id', 'class_student.student_id')
+            ->leftJoin('classes', 'class_student.class_id', 'classes.class_id')
+            ->leftJoin('sections', 'sections.section_id', 'class_student.section_id')
+            ->leftJoin('student_attendance', 'students.student_id', 'student_attendance.student_id')
+            ->where('student_attendance.attendance_date', $request->date ?? Carbon::today());
+
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('last_name', 'like', '%' . $search . '%');
+            $query->orWhere('first_name', 'like', '%' . $search . '%');
+            $query->orWhere('class_name', 'like', '%' . $search . '%');
+        }
+
+        if ($request->has('filters')) {
+            foreach ($request->filters as $column => $value) {
+                if ($value !== null) {
+                    $query->where('classes.class_id', $value);
+                }
+            }
+        }
+
+        if ($request->has('sort')) {
+            $query->orderBy($request->sort['field'], $request->sort['direction']);
+        } else {
+            $query->orderBy('students.created_at', 'desc');
+        }
+
+        $perPage = $request->per_page ?? 10;
+        $students = $query->paginate($perPage);
+
+        foreach ($students->items() as &$student) {
+            $attendance = StudentAttendance::where('student_id', $student['student_id'])
+                ->whereDate('created_at', Carbon::today())
+                ->first();
+            if ($attendance)
+                $student['attendance'] = $attendance['attendance'];
+        }
+        unset($student);
+
+        return response()->json([
+            'data' => $students->items(),
+            'meta' => [
+                'current_page' => $students->currentPage(),
+                'last_page' => $students->lastPage(),
+                'per_page' => $students->perPage(),
+                'total' => $students->total(),
+                'from' => $students->firstItem(),
+                'to' => $students->lastItem(),
+            ],
+        ]);
+    }
     public function getStudentByClass(Request $request)
     {
-        $student = ClassStudent::select(['students.student_id as id', DB::raw("concat(students.last_name, ' ', students.first_name) as name")])
+        $query = ClassStudent::select(['class_student.class_student_id', 'students.student_id as id', DB::raw("concat(students.last_name, ' ', students.first_name) as name")])
             ->leftJoin('students', function ($join) use ($request) {
                 $join->on('class_student.student_id', 'students.student_id')
                     ->where('class_student.class_id', $request->id);
-            })
-            ->where('last_name', 'like', '%' . $request->search . '%')
-            ->orWhere('first_name', 'like', '%' . $request->search . '%')
+            });
+
+        if ($request->has('search')) {
+            $query->where('last_name', 'like', '%' . $request->search . '%')
+                ->orWhere('first_name', 'like', '%' . $request->search . '%');
+        }
+
+        $student = $query->where('class_student.class_id', $request->id)
             ->get();
 
         return response()->json($student);

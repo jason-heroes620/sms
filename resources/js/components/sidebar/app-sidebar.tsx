@@ -197,15 +197,15 @@ const items = [
                         label: 'Add Homework',
                         href: '/homework/create',
                     },
-                    {
-                        key: 'submissions',
-                        label: 'Submissions',
-                        href: '/homework-submissions',
-                    },
+                    // {
+                    //     key: 'submissions',
+                    //     label: 'Submissions',
+                    //     href: '/homework-submissions',
+                    // },
                     {
                         key: 'submissions',
                         label: '',
-                        href: '/homework-submissions/:id',
+                        href: '/homeworks/submissions/:id',
                     },
                     {
                         key: 'homework-view',
@@ -228,12 +228,22 @@ const items = [
                     {
                         key: 'add-exam',
                         label: 'Add Exam',
-                        href: '/exam/create',
+                        href: '/exams/create',
+                    },
+                    // {
+                    //     key: 'exam-results',
+                    //     label: 'Exam Results',
+                    //     href: '/exam_results',
+                    // },
+                    {
+                        key: 'exam-view',
+                        label: '',
+                        href: '/exams/:id',
                     },
                     {
                         key: 'exam-results',
-                        label: 'Exam Results',
-                        href: '/exam/results',
+                        label: '',
+                        href: '/exams/results/:id',
                     },
                 ],
             },
@@ -252,6 +262,11 @@ const items = [
                         key: 'new-assessments',
                         label: 'New Assessments',
                         href: '/assessment/create',
+                    },
+                    {
+                        key: 'view-assessments',
+                        label: '',
+                        href: '/assessments/:id',
                     },
                 ],
             },
@@ -483,7 +498,14 @@ export function AppSidebar() {
     return (
         <ScrollArea>
             <Sidebar side="left" collapsible="icon" variant="sidebar">
-                <SidebarContent className="pt-4 md:pt-10">
+                <div className="flex h-16 w-auto">
+                    <img
+                        src="img/heroesCampus.jpg"
+                        alt=""
+                        className="object-contain"
+                    />
+                </div>
+                <SidebarContent className="pt-4 md:pt-2">
                     <SidebarGroup>
                         <SidebarGroupContent>
                             <SidebarMenu>

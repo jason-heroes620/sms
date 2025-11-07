@@ -96,6 +96,19 @@ class JibbleService
         }
     }
 
+    public function getLeaves($client)
+    {
+        $client = new Client();
+        $request = new Request('GET', $this->api_link . '/v1/TimeOffOverview?$count=true&$expand=person($select=id),policy($select=name,compensation,kind,id)&$filter=(((startDate ge 2024-02-01 and startDate le 2024-02-07) or (endDate ge 2024-02-01 and endDate le 2024-02-07)))&$orderby=startDate desc&$skip=0&$top=20');
+        $options = [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $client->getAccessToken(),
+            ],
+        ];
+        $res = $client->sendAsync($request, $options)->wait();
+        echo $res->getBody();
+    }
+
     private function handleTokenExpiration(Client $client, string $originalFunction, string $oldToken, $data = null)
     {
         // Make a request to the token endpoint to get a new token.

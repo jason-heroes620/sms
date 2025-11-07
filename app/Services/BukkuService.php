@@ -49,19 +49,21 @@ class BukkuService
 
     public function createProduct($data)
     {
-        try {
-            $client = new Client();
-            $response = $client->request('POST', $this->api_link . '/products', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $this->token,
-                    'Content-Type' => 'application/json',
-                    'Company-Subdomain' => $this->subdomain
-                ],
-                'json' => $data
-            ]);
-            return $response;
-        } catch (Exception $e) {
-            Log::error($e->getMessage());
+        if ($this->integration_status === 'enabled') {
+            try {
+                $client = new Client();
+                $response = $client->request('POST', $this->api_link . '/products', [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $this->token,
+                        'Content-Type' => 'application/json',
+                        'Company-Subdomain' => $this->subdomain
+                    ],
+                    'json' => $data
+                ]);
+                return $response;
+            } catch (Exception $e) {
+                Log::error($e->getMessage());
+            }
         }
     }
 
@@ -69,21 +71,23 @@ class BukkuService
     {
         Log::info('Bukku Service');
         Log::info($data);
-        try {
-            $client = new Client();
-            $response = $client->request('POST', $this->api_link . '/sales/invoices', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $this->token,
-                    'Content-Type' => 'application/json',
-                    'Company-Subdomain' => $this->subdomain,
-                    'Accept' => 'application/json'
-                ],
-                'json' => $data
-            ]);
+        if ($this->integration_status === 'enabled') {
+            try {
+                $client = new Client();
+                $response = $client->request('POST', $this->api_link . '/sales/invoices', [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $this->token,
+                        'Content-Type' => 'application/json',
+                        'Company-Subdomain' => $this->subdomain,
+                        'Accept' => 'application/json'
+                    ],
+                    'json' => $data
+                ]);
 
-            return $response->getBody()->getContents();
-        } catch (Exception $e) {
-            Log::error($e->getMessage());
+                return $response->getBody()->getContents();
+            } catch (Exception $e) {
+                Log::error($e->getMessage());
+            }
         }
     }
 }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('tag_id')->primary();
             $table->string('tag', 100);
             $table->enum('by_admin', ['yes', 'no'])->default('no');
-            $table->uuid('tag_group_id');
+            $table->integer('tag_group_id');
             $table->uuid('parent_id')->nullable();
             $table->enum('tag_status', ['active', 'inactive'])->default('active');
             $table->uuid('created_by');

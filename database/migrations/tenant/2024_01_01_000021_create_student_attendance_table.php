@@ -16,6 +16,8 @@ return new class extends Migration
             $table->uuid('student_id');
             $table->uuid('class_id');
             $table->date('attendance_date');
+            $table->time('check_in_time')->nullable();
+            $table->time('check_out_time')->nullable();
             $table->enum('status', ['present', 'absent', 'late', 'excused'])->default('present');
             $table->text('remarks')->nullable();
             $table->uuid('recorded_by');

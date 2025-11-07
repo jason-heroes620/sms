@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Tenant\IntegrationPayrollItems;
 use App\Models\Tenant\Integrations;
 use App\Services\BukkuService;
+use App\Services\PayrollService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -12,11 +14,12 @@ use Inertia\Inertia;
 
 class IntegrationController extends Controller
 {
-    public $bukkuService;
+    public $bukkuService, $payrollService;
 
-    public function __construct(BukkuService $bukkuService)
+    public function __construct(BukkuService $bukkuService, PayrollService $payrollService)
     {
         $this->bukkuService = $bukkuService;
+        $this->payrollService = $payrollService;
     }
     /**
      * Display a listing of the resource.
@@ -142,5 +145,22 @@ class IntegrationController extends Controller
                 'integration_status' => $request->integration_status,
             ]
         );
+    }
+
+    public function payrollItems()
+    {
+        $payrollItems = IntegrationPayrollItems::all();
+
+        $payrolls = [];
+        $items = $this->payrollService->getPayrollItems();
+
+        foreach ($items as $item) {
+            Log::info($item);
+            $payrolls[] = [
+                'value' => $item['id'],
+                'label' => $item['name'],
+            ];
+        }
+        return response()->json(['payrollItems' => $payrollItems, 'payrolls' => $payrolls]);
     }
 }

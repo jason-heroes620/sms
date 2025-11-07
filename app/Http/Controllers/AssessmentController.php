@@ -6,11 +6,15 @@ use App\Models\Tenant\AcademicYearClass;
 use App\Models\Tenant\Assessments;
 use App\Models\Tenant\BranchClass;
 use App\Models\Tenant\Branches;
+use App\Models\Tenant\ClassStudent;
+use App\Models\Tenant\Students;
 use App\Models\Tenant\TagGroups;
 use App\Models\Tenant\Tags;
+use App\Models\Tenant\UserProfiles;
 use App\Services\GeminiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -40,8 +44,9 @@ class AssessmentController extends Controller
 
     public function showAll(Request $request)
     {
-        $query = Assessments::select(['assessment_id', 'students.student_first_name', 'students.student_last_name', 'users.last_name', 'users.first_name', 'assessments.created_at'])
-            ->leftJoin('students', 'students.student_id', 'assessments.student_id')
+        $query = Assessments::select(['assessment_id', 'students.first_name as student_first_name', 'students.last_name as student_last_name', 'user_profiles.last_name', 'user_profiles.first_name', 'assessments.created_at', 'comments'])
+            ->leftJoin('class_student', 'class_student.class_student_id', 'assessments.class_student_id')
+            ->leftJoin('students', 'students.student_id', 'class_student.student_id')
             ->leftJoin('user_profiles', 'user_profiles.user_id', 'assessments.created_by');
 
         if ($request->has('filters')) {
@@ -100,19 +105,20 @@ class AssessmentController extends Controller
     public function store(Request $request)
     {
         try {
-            $user = $request->user();
+            $user = Auth::id();
             $request->validate([
                 'comments' => 'required|string',
                 'class_id' => 'required|string',
-                'subjec_id' => 'required|string',
-
             ]);
+            $classStudent = ClassStudent::where('class_id', $request->class_id)
+                ->where('student_id', $request->student_id)
+                ->first()->class_student_id;
 
             Assessments::create([
                 'comments' => $request->comments,
-                'class_id' => $request->class_id,
-                'subject_id' => $request->subject_id,
-                'created_by' => $user->id(),
+                'class_student_id' => $classStudent,
+                'assessment_date' => date('Y-m-d'),
+                'created_by' => $user,
             ]);
             return redirect()->back()->with('success', 'Assessment created successfully');
         } catch (Exceptions $e) {
@@ -120,12 +126,41 @@ class AssessmentController extends Controller
         }
     }
 
+    public function edit($id)
+    {
+        $assessment = Assessments::where('assessment_id', $id)->first();
+        $assessment['name'] = ClassStudent::select(DB::raw('CONCAT(first_name, " ", last_name) as name'))
+            ->leftJoin('students', 'students.student_id', 'class_student.student_id')
+            ->where('class_student.class_student_id', $assessment->class_student_id)->first()->name;
+        $assessment['assessed_by'] = UserProfiles::select(DB::raw('CONCAT(first_name, " ", last_name) as name'))
+            ->where('user_id', $assessment->created_by)->first()->name;
+        return Inertia::render('Base/Assessments/EditAssessment', compact('assessment'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'comments' => 'required|string',
+            ]);
+            Assessments::where('assessment_id', $id)->update([
+                'comments' => $request->comments,
+            ]);
+            return redirect()->back()->with('success', 'Assessment updated successfully');
+        } catch (Exceptions $e) {
+            return redirect()->back()->with('error', 'Error updating assessment.');
+        }
+    }
+
+
     public function generateQuery(Request $request)
     {
         Log::info('run gemini query');
         $data = $request->input('tags');
-        // dd($data);
-        $query = "generate a single friendly sentence from these words to describe a teacher's observation on a student that can be sent to parents as an assessment review:" . implode(',', $request->input('tags'));
+        $student = Students::select('first_name as name')
+            ->where('student_id', $request->input('student_id'))->first();
+
+        $query = "generate a single friendly sentence from these words to describe a teacher's observation of a student, " . $student->name . " that can be sent to parents as an assessment review:" . implode(',', $request->input('tags'));
 
         $response = $this->geminiService->ask($query);
 
