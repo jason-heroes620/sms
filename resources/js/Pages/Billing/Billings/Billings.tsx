@@ -9,12 +9,6 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
     Select,
     SelectContent,
     SelectGroup,
@@ -23,9 +17,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import moment from 'moment';
 import { toast } from 'sonner';
 
@@ -96,31 +90,31 @@ export const columns: ColumnDef<Billing>[] = [
             return `${status.billing_status.toUpperCase()}`;
         },
     },
-    {
-        id: 'actions',
-        cell: ({ row }) => {
-            const billing = row.original;
+    // {
+    //     id: 'actions',
+    //     cell: ({ row }) => {
+    //         const billing = row.original;
 
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger>
-                        <MoreHorizontal />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                            onClick={() =>
-                                router.visit(
-                                    route('billing.edit', billing.billing_id),
-                                )
-                            }
-                        >
-                            Edit
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            );
-        },
-    },
+    //         return (
+    //             <DropdownMenu>
+    //                 <DropdownMenuTrigger>
+    //                     <MoreHorizontal />
+    //                 </DropdownMenuTrigger>
+    //                 <DropdownMenuContent align="end">
+    //                     <DropdownMenuItem
+    //                         onClick={() =>
+    //                             router.visit(
+    //                                 route('billing.edit', billing.billing_id),
+    //                             )
+    //                         }
+    //                     >
+    //                         Edit
+    //                     </DropdownMenuItem>
+    //                 </DropdownMenuContent>
+    //             </DropdownMenu>
+    //         );
+    //     },
+    // },
 ];
 
 const Billings = () => {

@@ -28,7 +28,7 @@ class PositionController extends Controller
 
     public function showAll(Request $request)
     {
-        $query = Positions::select('position');
+        $query = Positions::select('position', 'position_id');
 
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -110,6 +110,35 @@ class PositionController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Error creating position');
+            Log::error($e);
+            return redirect()->back()->with(
+                'error',
+                $e->getMessage()
+            );
+        }
+    }
+
+    public function edit($id)
+    {
+        $position = Positions::find($id);
+        return response()->json([
+            'position' => $position,
+        ]);
+    }
+    public function update(Request $request, $id)
+    {
+        try {
+            $position = Positions::find($id);
+            $position->update([
+                'position' => $request->position,
+            ]);
+
+            return redirect()->back()->with(
+                'success',
+                'Position updated successfully'
+            );
+        } catch (Exception $e) {
+            Log::error('Error updating position');
             Log::error($e);
             return redirect()->back()->with(
                 'error',

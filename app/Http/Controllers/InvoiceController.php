@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Tenant\Branches;
 use App\Models\Tenant\Invoices;
+use App\Models\Tenant\PackageFees;
+use App\Models\Tenant\StudentPackage;
 use App\Models\Tenant\Students;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class InvoiceController extends Controller
@@ -32,7 +36,7 @@ class InvoiceController extends Controller
 
     public function showAll(Request $request)
     {
-        $query = Invoices::select(['invoice_id', 'invoice_no', 'invoice_date', 'due_date', 'invoice_amount', 'invoice_status', 'class_name'])
+        $query = Invoices::select(['invoice_id', 'invoice_no', 'invoice_date', 'due_date', 'invoice_amount', 'invoice_status', 'class_name', DB::raw('CONCAT(students.first_name, " ", students.last_name) as student_name')])
             ->leftJoin('students', 'students.student_id', 'invoices.student_id')
             ->leftJoin('class_student', 'class_student.student_id', 'students.student_id')
             ->leftJoin('classes', 'classes.class_id', 'class_student.class_id')
@@ -48,7 +52,7 @@ class InvoiceController extends Controller
         if ($request->has('sort')) {
             $query->orderBy($request->sort['field'], $request->sort['direction']);
         } else {
-            $query->orderBy('invoices.created_at', 'desc');
+            $query->orderBy('invoices.invoice_date', 'desc', 'invoices.invoice_no', 'desc');
         }
 
         $perPage = $request->per_page ?? 10;
@@ -95,9 +99,23 @@ class InvoiceController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Invoices $invoices)
+    public function edit($id)
     {
-        //
+        $invoice = Invoices::select(['invoice_id', 'invoice_no', 'invoice_date', 'due_date', 'invoice_amount', 'invoice_status',  DB::raw('CONCAT(students.first_name, " ", students.last_name) as student_name'), 'invoices.student_id'])
+            ->leftJoin('students', 'students.student_id', 'invoices.student_id')
+            ->where('invoice_id', $id)
+            ->first();
+        Log::info($invoice);
+        $package = StudentPackage::select('package_name', 'package_price', 'student_packages.package_id')
+            ->leftJoin('packages', 'packages.package_id', 'student_packages.package_id')
+            ->where('student_id', $invoice->student_id)->first();
+        Log::info($package);
+        $fees = PackageFees::leftJoin('fees', 'fees.fee_id', 'package_fees.fee_id')
+            ->where('package_id', $package->package_id)->get();
+        $invoice['package'] = $package;
+        $invoice['fees'] = $fees;
+
+        return Inertia::render('Billing/Invoices/Invoice', compact('invoice'));
     }
 
     /**

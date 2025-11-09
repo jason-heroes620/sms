@@ -9,6 +9,16 @@ class ReportController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Base/Report/Reports');
+        return Inertia::render('Reports/Reports');
+    }
+
+    public function studentAssessment()
+    {
+        return Inertia::render('Reports/StudentAssessment');
+    }
+
+    public function studentAttendance()
+    {
+        return Inertia::render('Reports/StudentAttendance');
     }
 }

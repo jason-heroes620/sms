@@ -24,6 +24,7 @@ class BranchClass extends Model
                 $query->where('is_current', 'true');
                 $query->where('classes.academic_year_id', 'academic_year.academic_year_id');
             })->whereIn('branches.branch_id', BranchUser::getUserBranchIds($user))
+            ->orderBy('class_name')
             ->get();
     }
 
@@ -36,6 +37,7 @@ class BranchClass extends Model
                 $query->where('is_current', 'true');
                 $query->where('classes.academic_year_id', 'academic_year.academic_year_id');
             })->whereIn('branches.branch_id', BranchUser::getUserBranchIds($user))
+            ->orderBy('class_name')
             ->get();
     }
 }

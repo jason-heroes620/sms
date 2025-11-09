@@ -167,11 +167,40 @@ class FeeController extends Controller
                 'classification_code' => $request->classification_code,
             ]);
             Log::info('bukku product');
-            $product = $this->convertBukkuData($request);
+            $product = $this->convertBukkuData($request,  $fee->bukku_units);
             // $this->bukkuService->createProduct($pro);
 
-            Log::info($product);
 
+            Log::info($fee);
+
+            if ($fee->bukku_product_id === null || $fee->bukku_product_id === '') {
+                $resp = $this->bukkuService->createProduct($product);
+                Log::info('bukku product response');
+                Log::info(json_decode($resp, true));
+                $data = json_decode($resp, true);
+
+                $product_id = $data['product']['id'];
+                $units = $resp['product']['units'];
+
+                $fee->update([
+                    'bukku_product_id' => $product_id,
+                    'bukku_units' => $units
+                ]);
+            } else {
+                $resp = $this->bukkuService->updateProduct($product, $fee->bukku_product_id);
+                Log::info('data response');
+                // Log::info(json_decode($resp, true));
+                $data = json_decode($resp, true);
+                Log::info($data);
+                $product_id = $data['product']['id'];
+                Log::info($product_id);
+                $units = $data['product']['units'];
+                if ($fee->bukku_units === null) {
+                    $fee->update([
+                        'bukku_units' => $units
+                    ]);
+                }
+            }
             // get product id, units id,
 
             return redirect()->back()->with('success', 'Fee updated successfully.');
@@ -216,7 +245,7 @@ class FeeController extends Controller
         return response()->json(compact('uom', 'taxes', 'fee_type', 'classification_codes'));
     }
 
-    private function convertBukkuData($request)
+    private function convertBukkuData($request, $units = null)
     {
         $account = IntegrationConfigurations::select('configuration_value')->where('configuration_name', 'income_account')->first();
 
@@ -229,7 +258,7 @@ class FeeController extends Controller
             'sale_tax_code_id' => $request->tax_id,
             'track_inventory' => false,
             'is_buying' => false,
-            'units' => [
+            'units' => $units ? json_decode($units) : [
                 [
                     'label' => $request->uom,
                     'rate' => 1,

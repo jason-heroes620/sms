@@ -18,7 +18,7 @@ class BukkuService
         $this->api_link = $integrations->api_link;
         $this->token = $integrations->token;
         $this->subdomain = $integrations->subdomain;
-        $this->integration_status = $integrations->status;
+        $this->integration_status = $integrations->integration_status;
     }
 
     public function configurationList($config = null)
@@ -49,7 +49,10 @@ class BukkuService
 
     public function createProduct($data)
     {
+        Log::info('integration status' . $this->integration_status);
         if ($this->integration_status === 'enabled') {
+            Log::info('try create product');
+            Log::info(json_encode($data));
             try {
                 $client = new Client();
                 $response = $client->request('POST', $this->api_link . '/products', [
@@ -58,9 +61,34 @@ class BukkuService
                         'Content-Type' => 'application/json',
                         'Company-Subdomain' => $this->subdomain
                     ],
-                    'json' => $data
+                    'body' => json_encode($data)
                 ]);
-                return $response;
+                Log::info('create product response');
+                return $response->getBody()->getContents();
+            } catch (Exception $e) {
+                Log::error($e->getMessage());
+            }
+        }
+    }
+
+    public function updateProduct($data, $id)
+    {
+        Log::info('integration status' . $this->integration_status);
+        if ($this->integration_status === 'enabled') {
+            Log::info('try update product');
+            Log::info(json_encode($data));
+            try {
+                $client = new Client();
+                $response = $client->request('PUT', $this->api_link . '/products/' . $id, [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $this->token,
+                        'Content-Type' => 'application/json',
+                        'Company-Subdomain' => $this->subdomain
+                    ],
+                    'body' => json_encode($data)
+                ]);
+                Log::info('update product response');
+                return $response->getBody()->getContents();
             } catch (Exception $e) {
                 Log::error($e->getMessage());
             }

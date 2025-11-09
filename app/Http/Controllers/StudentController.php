@@ -31,18 +31,29 @@ class StudentController extends Controller
 
     public function index(Request $request)
     {
-        $classes = Classes::select('class_id as id', 'class_name as value')->withActiveAcademicYears()->get()->toArray();
+        $user = Auth::id();
+        // $classes = Classes::select('class_id as id', 'class_name as value')->get()->toArray();
+        $branchClass = BranchClass::getCustomClassesByBranchIds($user)->toArray();
+        $classes = array_map(function ($item) {
+            return [
+                'id' => $item['class_id'],
+                'value' => $item['class_name']
+            ];
+        }, $branchClass);
+        Log::info($classes);
         array_unshift($classes, ['id' => ' ', 'value' => 'All Classes']);
         return Inertia::render('Base/Student/Students', compact('classes'));
     }
 
     public function showAll(Request $request)
     {
-        $query = Students::select(['students.student_id', DB::raw("concat(last_name, ' ', first_name) as student_name"), 'last_name', 'first_name', 'gender', 'class_name', 'section_name', 'classes.class_id', 'student_attendance.status'])
-            ->leftJoin('class_student', 'students.student_id', 'class_student.student_id')
+        $query = Students::select(['students.student_id', DB::raw("concat(last_name, ' ', first_name) as student_name"), 'last_name', 'first_name', 'gender', 'class_name', 'section_name', 'classes.class_id'])
+            ->leftJoin('class_student', function ($query) {
+                $query->on('class_student.student_id', 'students.student_id');
+                $query->where('class_student_status', 'active');
+            })
             ->leftJoin('classes', 'class_student.class_id', 'classes.class_id')
-            ->leftJoin('sections', 'sections.section_id', 'class_student.section_id')
-            ->leftJoin('student_attendance', 'students.student_id', 'student_attendance.student_id');
+            ->leftJoin('sections', 'sections.section_id', 'class_student.section_id');
 
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -62,7 +73,7 @@ class StudentController extends Controller
         if ($request->has('sort')) {
             $query->orderBy($request->sort['field'], $request->sort['direction']);
         } else {
-            $query->orderBy('students.created_at', 'desc');
+            $query->orderBy('student_name', 'asc');
         }
 
         $perPage = $request->per_page ?? 10;
@@ -348,12 +359,21 @@ class StudentController extends Controller
 
     public function getStudentAttendance(Request $request)
     {
-        $query = Students::select(['students.student_id', DB::raw("concat(last_name, ' ', first_name) as student_name"), 'last_name', 'first_name', 'gender', 'class_name', 'section_name', 'classes.class_id', 'student_attendance.status', 'check_in_time', 'check_out_time'])
-            ->leftJoin('class_student', 'students.student_id', 'class_student.student_id')
+        $query = Students::select(['students.student_id', DB::raw("concat(last_name, ' ', first_name) as student_name"), 'last_name', 'first_name', 'gender', 'class_name', 'section_name', 'classes.class_id'])
+            ->leftJoin('class_student', function ($query) {
+                $query->on('class_student.student_id', 'students.student_id');
+                $query->where('class_student_status', 'active');
+            })
             ->leftJoin('classes', 'class_student.class_id', 'classes.class_id')
             ->leftJoin('sections', 'sections.section_id', 'class_student.section_id')
-            ->leftJoin('student_attendance', 'students.student_id', 'student_attendance.student_id')
-            ->where('student_attendance.attendance_date', $request->date ?? Carbon::today());
+            ->leftJoin(
+                'academic_years',
+                function ($query) {
+                    $query->where('is_current', 'true');
+                    $query->where('classes.academic_year_id', 'academic_year.academic_year_id');
+                }
+            );
+        // ->where('student_attendance.attendance_date', $request->date ?? Carbon::today());
 
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -373,7 +393,7 @@ class StudentController extends Controller
         if ($request->has('sort')) {
             $query->orderBy($request->sort['field'], $request->sort['direction']);
         } else {
-            $query->orderBy('students.created_at', 'desc');
+            $query->orderBy('student_name', 'asc');
         }
 
         $perPage = $request->per_page ?? 10;
@@ -381,10 +401,13 @@ class StudentController extends Controller
 
         foreach ($students->items() as &$student) {
             $attendance = StudentAttendance::where('student_id', $student['student_id'])
-                ->whereDate('created_at', Carbon::today())
+                ->whereDate('attendance_date', Carbon::today())
                 ->first();
-            if ($attendance)
-                $student['attendance'] = $attendance['attendance'];
+            if ($attendance) {
+                $student['status'] = $attendance['status'];
+                $student['check_in_time'] = $attendance['check_in_time'];
+                $student['check_out_time'] = $attendance['check_out_time'];
+            }
         }
         unset($student);
 

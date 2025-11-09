@@ -290,7 +290,11 @@ const GuardianForm = ({
                             </div>
                         ),
                     )}
-
+                    {errors.parents && (
+                        <p className="text-sm text-red-700">
+                            * {errors.parents}
+                        </p>
+                    )}
                     <div className="mt-4 flex">
                         <Button
                             type="button"

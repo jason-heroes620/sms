@@ -1,4 +1,5 @@
 import { DataTable } from '@/components/Datatables/data-table';
+import EditSheet from '@/components/EditSheet';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -6,13 +7,12 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
-import { FormEvent } from 'react';
-import { toast } from 'sonner';
+import { useState } from 'react';
+import PositionForm from './PositionForm';
 
 type Position = {
     position_id: string;
@@ -33,42 +33,52 @@ export const columns: ColumnDef<Position>[] = [
         cell: ({ row }) => {
             const position = row.original;
 
+            const [id, setId] = useState('');
+            const [isSheetOpen, setIsSheetOpen] = useState(false);
+            const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+            const editable = [''];
+            const handleEditClick = (id: string) => {
+                setIsDropdownOpen(false);
+                setIsSheetOpen(true);
+                setId(id);
+            };
+
             return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger>
-                        <MoreHorizontal />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                            onClick={() => console.log(position.position_id)}
-                        >
-                            Edit
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <div>
+                    <DropdownMenu
+                        open={isDropdownOpen}
+                        onOpenChange={setIsDropdownOpen}
+                    >
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                                onSelect={(e) => {
+                                    e.preventDefault();
+                                    handleEditClick(position.position_id);
+                                }}
+                            >
+                                Edit
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <EditSheet
+                        isSheetOpen={isSheetOpen}
+                        setIsSheetOpen={setIsSheetOpen}
+                    >
+                        <PositionForm id={id} />
+                    </EditSheet>
+                </div>
             );
         },
     },
 ];
 
 const Positions = () => {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        position: '',
-    });
-
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
-
-        post(route('position.store'), {
-            onSuccess: () => {
-                toast.success('Position added successfully');
-            },
-            onError: (error) => {
-                toast.error('Failed to add position.' + error);
-            },
-            onFinish: () => reset('position'),
-        });
-    };
     return (
         <AuthenticatedLayout>
             <Head title="Positions" />
@@ -86,47 +96,7 @@ const Positions = () => {
                     <div className="overflow-hidden bg-white p-4 shadow-sm sm:rounded-lg dark:bg-gray-800">
                         <div className="flex flex-col gap-6 md:grid md:grid-cols-3">
                             <div className="rounded-md border p-4 shadow-md">
-                                <form onSubmit={handleSubmit}>
-                                    <div className="mb-4 flex flex-col">
-                                        <label
-                                            htmlFor="position"
-                                            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                        >
-                                            Position{' '}
-                                            <span className="text-red-800">
-                                                *
-                                            </span>
-                                        </label>
-                                        <Input
-                                            className="mt-1"
-                                            maxLength={50}
-                                            value={data.position}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'position',
-                                                    e.target.value,
-                                                )
-                                            }
-                                            required
-                                        />
-                                        {errors.position && (
-                                            <p className="mt-2 text-sm text-red-600">
-                                                {errors.position}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <div className="flex justify-end py-4">
-                                        <Button
-                                            type="submit"
-                                            variant={'primary'}
-                                            size={'sm'}
-                                            disabled={processing}
-                                        >
-                                            {processing ? 'Saving ...' : 'Add'}
-                                        </Button>
-                                    </div>
-                                </form>
+                                <PositionForm />
                             </div>
                             <div className="col-span-2">
                                 <DataTable

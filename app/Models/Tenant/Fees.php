@@ -21,6 +21,8 @@ class Fees extends Model
         'tax_id',
         'tax_code',
         'tax_rate',
-        'classification_code'
+        'classification_code',
+        'bukku_product_id',
+        'bukku_units',
     ];
 }

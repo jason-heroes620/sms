@@ -152,6 +152,8 @@ Route::middleware('auth')->group(function () {
 
     // Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/student-attendance', [ReportController::class, 'studentAttendance'])->name('reports.student-attendance');
+    Route::get('/reports/student-assessment', [ReportController::class, 'studentAssessment'])->name('reports.student-assessment');
 
     // Announcements
     Route::get('/announcements/{id?}', [AnnouncementController::class, 'index'])->name('announcements.index');
@@ -237,6 +239,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/positions', [PositionController::class, 'index'])->name('positions.index');
     Route::get('/positions/showAll', [PositionController::class, 'showAll'])->name('positions.showAll');
     Route::post('/positions/store', [PositionController::class, 'store'])->name('position.store');
+    Route::get('/positions/edit/{id}', [PositionController::class, 'edit'])->name('position.edit');
     Route::put('/positions/{id}', [PositionController::class, 'update'])->name('position.update');
 
 

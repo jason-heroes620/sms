@@ -1,5 +1,4 @@
 import { DataTable } from '@/components/Datatables/data-table';
-import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -9,7 +8,8 @@ import {
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Plus } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
+import moment from 'moment';
 
 type Branch = {
     branch_id: string;
@@ -18,7 +18,6 @@ type Branch = {
 
 type Invoices = {
     invoice_id: string;
-    branch_name: string;
     class_name: string;
     invoice_no: string;
     student_name: string;
@@ -28,13 +27,6 @@ type Invoices = {
 };
 
 export const columns: ColumnDef<Invoices>[] = [
-    {
-        accessorKey: 'branch_name',
-        header: 'Branch',
-        cell: ({ row }) => {
-            return row.getValue('branch_name') as string;
-        },
-    },
     {
         accessorKey: 'class_name',
         header: 'Class Name',
@@ -47,6 +39,14 @@ export const columns: ColumnDef<Invoices>[] = [
         header: 'Invoice No',
         cell: ({ row }) => {
             return row.getValue('invoice_no') as string;
+        },
+    },
+    {
+        accessorKey: 'invoice_date',
+        header: 'Invoice Date',
+        cell: ({ row }) => {
+            const invoice = row.original;
+            return moment(invoice.invoice_date).format('MMM');
         },
     },
     {
@@ -95,7 +95,7 @@ export const columns: ColumnDef<Invoices>[] = [
                         <DropdownMenuItem
                             onClick={() =>
                                 router.visit(
-                                    route('class.edit', invoice.invoice_id),
+                                    route('invoices.edit', invoice.invoice_id),
                                 )
                             }
                         >
@@ -127,7 +127,7 @@ const Invoices = ({ branches }: { branches: Branch[] }) => {
                             <span className="font-bold">Invoices </span>
                             <span> | All Invoices</span>
                         </div>
-                        <div className="flex justify-end">
+                        {/* <div className="flex justify-end">
                             <Button
                                 variant={'primary'}
                                 size={'sm'}
@@ -138,7 +138,7 @@ const Invoices = ({ branches }: { branches: Branch[] }) => {
                                 <Plus />
                                 Create
                             </Button>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
                 <div className="py-8">
@@ -150,7 +150,7 @@ const Invoices = ({ branches }: { branches: Branch[] }) => {
                                     endpoint="/all_invoices"
                                     options={{
                                         showSearch: true,
-                                        showFilters: true,
+                                        showFilters: false,
                                         showPagination: true,
                                         defaultPageSize: 10,
                                     }}

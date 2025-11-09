@@ -23,6 +23,8 @@ return new class extends Migration
             $table->decimal('tax_rate', 5, 2)->default(0.00);
             $table->string('classification_code', 20)->nullable();
             $table->enum('fee_status', ['active', 'inactive'])->default('active');
+            $table->integer('bukku_product_id', 11)->nullable();
+            $table->text('bukku_units', 11)->nullable();
             $table->timestamps();
         });
     }

@@ -28,9 +28,7 @@ import {
     MonitorCog,
     Newspaper,
     NotebookPen,
-    NotepadText,
     PencilRuler,
-    Receipt,
     School,
     User,
     Users,
@@ -270,13 +268,24 @@ const items = [
                     },
                 ],
             },
-            {
-                key: 'reports',
-                label: 'Reports',
-                icon: NotepadText,
-                href: '/reports',
-                subItems: [],
-            },
+            // {
+            //     key: 'reports',
+            //     label: 'Reports',
+            //     icon: NotepadText,
+            //     href: '/reports',
+            //     subItems: [
+            //         {
+            //             key: 'report-student-attendance',
+            //             label: 'Student Attendance',
+            //             href: '/reports/student-attendance',
+            //         },
+            //         {
+            //             key: 'report-student-assessment',
+            //             label: 'Student Assessment',
+            //             href: '/reports/student-assessment',
+            //         },
+            //     ],
+            // },
             {
                 key: 'announcements',
                 label: 'Announcements',
@@ -312,15 +321,27 @@ const items = [
                 label: 'Invoices',
                 icon: Banknote,
                 href: '/invoices',
-                subItems: [],
+                subItems: [
+                    {
+                        key: 'all-invoices',
+                        label: 'Invoices',
+                        href: '/invoices',
+                    },
+                    {
+                        key: 'invoice',
+                        label: '',
+                        href: '/invoices/:id',
+                    },
+                ],
             },
-            {
-                key: 'receipts',
-                label: 'Receipts',
-                icon: Receipt,
-                href: '/receipts',
-                subItems: [],
-            },
+
+            // {
+            //     key: 'receipts',
+            //     label: 'Receipts',
+            //     icon: Receipt,
+            //     href: '/receipts',
+            //     subItems: [],
+            // },
         ],
     },
     {
@@ -498,9 +519,9 @@ export function AppSidebar() {
     return (
         <ScrollArea>
             <Sidebar side="left" collapsible="icon" variant="sidebar">
-                <div className="flex h-16 w-auto">
+                <div className="flex h-16 w-auto p-2">
                     <img
-                        src="img/heroesCampus.jpg"
+                        src="/img/heroesCampus.jpg"
                         alt=""
                         className="object-contain"
                     />
