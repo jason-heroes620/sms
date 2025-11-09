@@ -121,11 +121,11 @@ const items = [
                         label: 'Attendance',
                         href: '/student/attendance',
                     },
-                    {
-                        key: 'student-promotion',
-                        label: 'Student Promotion',
-                        href: '/student-promotion',
-                    },
+                    // {
+                    //     key: 'student-promotion',
+                    //     label: 'Student Promotion',
+                    //     href: '/student-promotion',
+                    // },
                     {
                         key: 'student-view',
                         label: '',
