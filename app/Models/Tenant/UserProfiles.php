@@ -36,6 +36,7 @@ class UserProfiles extends Model
         'spouse_info',
         'position_id',
         'payroll_employee_id',
+        'branch_id',
     ];
 
     protected $casts = [
